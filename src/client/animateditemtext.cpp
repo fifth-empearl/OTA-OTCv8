@@ -1,6 +1,7 @@
 #include "animateditemtext.h"
 #include "map.h"
 #include "game.h"
+#include "spritemanager.h"
 #include <framework/core/clock.h>
 #include <framework/core/eventdispatcher.h>
 #include <framework/graphics/graphics.h>
