@@ -27,6 +27,7 @@
 #include "item.h"
 #include "missile.h"
 #include "statictext.h"
+#include "creatureghost.h"
 #include "mapview.h"
 #include "minimap.h"
 
@@ -116,6 +117,7 @@ void Map::cleanTexts()
 {
     m_animatedTexts.clear();
     m_staticTexts.clear();
+    m_creatureGhosts.clear();
 }
 
 void Map::addThing(const ThingPtr& thing, const Position& pos, int stackPos)
@@ -175,6 +177,8 @@ void Map::addThing(const ThingPtr& thing, const Position& pos, int stackPos)
                 m_staticTexts.push_back(staticText);
             else
                 return;
+        } else if (thing->isCreatureGhost()) {
+            m_creatureGhosts.push_back(thing->static_self_cast<CreatureGhost>());
         }
 
         thing->setPosition(pos);
@@ -233,6 +237,13 @@ bool Map::removeThing(const ThingPtr& thing)
         auto it = std::find(m_staticTexts.begin(), m_staticTexts.end(), staticText);
         if(it != m_staticTexts.end()) {
             m_staticTexts.erase(it);
+            ret = true;
+        }
+    } else if(thing->isCreatureGhost()) {
+        auto ghost = thing->static_self_cast<CreatureGhost>();
+        auto it = std::find(m_creatureGhosts.begin(), m_creatureGhosts.end(), ghost);
+        if(it != m_creatureGhosts.end()) {
+            m_creatureGhosts.erase(it);
             ret = true;
         }
     } else if(const TilePtr& tile = thing->getTile())
@@ -527,6 +538,14 @@ void Map::removeUnawareThings()
         const StaticTextPtr& staticText = *it;
         if(staticText->getMessageMode() == Otc::MessageNone && !isAwareOfPosition(staticText->getPosition()))
             it = m_staticTexts.erase(it);
+        else
+            ++it;
+    }
+
+    for(auto it = m_creatureGhosts.begin(); it != m_creatureGhosts.end();) {
+        const CreatureGhostPtr& ghost = *it;
+        if(!isAwareOfPosition(ghost->getPosition()))
+            it = m_creatureGhosts.erase(it);
         else
             ++it;
     }

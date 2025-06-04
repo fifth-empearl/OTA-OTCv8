@@ -69,6 +69,7 @@ public:
     virtual bool isLocalPlayer() { return false; }
     virtual bool isAnimatedText() { return false; }
     virtual bool isStaticText() { return false; }
+    virtual bool isCreatureGhost() { return false; }
 
     // type shortcuts
     virtual const ThingTypePtr& getThingType();
