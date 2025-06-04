@@ -34,8 +34,7 @@ void AnimatedItemText::drawText(const Point& dest, const Rect& visibleRect)
     }
 
     Size textSize = m_cachedText.getTextSize();
-    Point textOffset((itemSize.width() - textSize.width()) / 2,
-                     (itemSize.height() - textSize.height()) / 2);
+    Point textOffset(itemSize.width() - 2, (itemSize.height() - textSize.height()) / 2);
     Rect textRect(p + textOffset, textSize);
     if (visibleRect.contains(textRect)) {
         m_cachedText.draw(textRect, color);
@@ -66,4 +65,3 @@ void AnimatedItemText::setFont(const std::string& fontName)
 {
     m_cachedText.setFont(g_fonts.getFont(fontName));
 }
-
