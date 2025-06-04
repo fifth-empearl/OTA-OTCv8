@@ -27,6 +27,7 @@
 #include "tile.h"
 #include "statictext.h"
 #include "animatedtext.h"
+#include "creatureghost.h"
 #include "missile.h"
 #include "lightview.h"
 #include "localplayer.h"
@@ -285,6 +286,17 @@ void MapView::drawMapForeground(const Rect& rect)
             if (m_drawManaBar) { flags |= Otc::DrawManaBar; }
         }
         c.first->drawInformation(c.second, g_map.isCovered(c.first->getPrewalkingPosition(), m_cachedFirstVisibleFloor), rect, flags);
+    }
+
+    for (const CreatureGhostPtr& ghost : g_map.getCreatureGhosts()) {
+        Position pos = ghost->getPosition();
+        if (pos.z != cameraPosition.z)
+            continue;
+        Point p = transformPositionTo2D(pos, cameraPosition) - drawOffset;
+        p.x = p.x * horizontalStretchFactor;
+        p.y = p.y * verticalStretchFactor;
+        p += rect.topLeft();
+        ghost->draw(p, true, m_lightView.get());
     }
 
     if (m_lightView) {

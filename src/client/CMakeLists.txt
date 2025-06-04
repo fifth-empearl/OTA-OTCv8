@@ -45,6 +45,8 @@ set(client_SOURCES ${client_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/spritemanager.h
     ${CMAKE_CURRENT_LIST_DIR}/statictext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/statictext.h
+    ${CMAKE_CURRENT_LIST_DIR}/creatureghost.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/creatureghost.h
     ${CMAKE_CURRENT_LIST_DIR}/thing.cpp
     ${CMAKE_CURRENT_LIST_DIR}/thing.h
     ${CMAKE_CURRENT_LIST_DIR}/thingtypemanager.cpp

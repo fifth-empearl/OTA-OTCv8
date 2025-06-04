@@ -28,6 +28,7 @@
 #include "item.h"
 #include "game.h"
 #include "effect.h"
+#include "creatureghost.h"
 #include "luavaluecasts_client.h"
 #include "lightview.h"
 #include "healthbars.h"
@@ -469,6 +470,11 @@ void Creature::onDisappear()
 void Creature::onDeath()
 {
     callLuaField("onDeath");
+
+    CreatureGhostPtr ghost = std::make_shared<CreatureGhost>();
+    ghost->setOutfit(m_outfit);
+    ghost->setDirection(m_direction);
+    g_map.addThing(ghost, getPosition());
 }
 
 int Creature::getWalkAnimationPhases()
