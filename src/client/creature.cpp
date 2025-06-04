@@ -31,6 +31,7 @@
 #include "luavaluecasts_client.h"
 #include "lightview.h"
 #include "healthbars.h"
+#include "creatureghost.h"
 
 #include <framework/graphics/graphics.h>
 #include <framework/core/eventdispatcher.h>
@@ -46,6 +47,21 @@
 #include <framework/util/extras.h>
 
 std::array<double, Otc::LastSpeedFormula> Creature::m_speedFormula = { -1,-1,-1 };
+
+static void showDeathGhost(const CreaturePtr& creature)
+{
+    if (!creature)
+        return;
+
+    auto ghost = std::make_shared<CreatureGhost>();
+    ghost->setOutfit(creature->getOutfit());
+    ghost->setDirection(creature->getDirection());
+    ghost->setDuration(1500);
+    ghost->setPosition(creature->getPosition());
+    g_map.addCreatureGhost(ghost);
+
+    g_dispatcher.scheduleEvent([ghost]() { g_map.removeCreatureGhost(ghost); }, 1500);
+}
 
 Creature::Creature() : Thing()
 {
@@ -468,7 +484,9 @@ void Creature::onDisappear()
 
 void Creature::onDeath()
 {
+    auto self = static_self_cast<Creature>();
     callLuaField("onDeath");
+    showDeathGhost(self);
 }
 
 int Creature::getWalkAnimationPhases()

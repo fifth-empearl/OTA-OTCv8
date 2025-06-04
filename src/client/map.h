@@ -29,9 +29,11 @@
 #include "creatures.h"
 #include "animatedtext.h"
 #include "statictext.h"
+#include "creatureghost.h"
 #include "tile.h"
 
 #include <framework/core/clock.h>
+#include <algorithm>
 
 enum OTBM_ItemAttr
 {
@@ -262,6 +264,12 @@ public:
 
     std::vector<AnimatedTextPtr> getAnimatedTexts() { return m_animatedTexts; }
     std::vector<StaticTextPtr> getStaticTexts() { return m_staticTexts; }
+    std::vector<CreatureGhostPtr> getCreatureGhosts() { return m_creatureGhosts; }
+    void addCreatureGhost(const CreatureGhostPtr& ghost) { if (ghost) m_creatureGhosts.push_back(ghost); }
+    void removeCreatureGhost(const CreatureGhostPtr& ghost) {
+        auto it = std::find(m_creatureGhosts.begin(), m_creatureGhosts.end(), ghost);
+        if (it != m_creatureGhosts.end()) m_creatureGhosts.erase(it);
+    }
 
     std::tuple<std::vector<Otc::Direction>, Otc::PathFindResult> findPath(const Position& start, const Position& goal, int maxComplexity, int flags = 0);
     PathFindResult_ptr newFindPath(const Position& start, const Position& goal, std::shared_ptr<std::list<Node*>> visibleNodes);
@@ -285,6 +293,7 @@ private:
     std::array<std::vector<MissilePtr>, Otc::MAX_Z+1> m_floorMissiles;
     std::vector<AnimatedTextPtr> m_animatedTexts;
     std::vector<StaticTextPtr> m_staticTexts;
+    std::vector<CreatureGhostPtr> m_creatureGhosts;
     std::vector<MapViewPtr> m_mapViews;
     std::unordered_map<Position, std::string, PositionHasher> m_waypoints;
 

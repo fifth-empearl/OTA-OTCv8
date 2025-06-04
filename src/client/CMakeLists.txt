@@ -20,6 +20,8 @@ set(client_SOURCES ${client_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/declarations.h
     ${CMAKE_CURRENT_LIST_DIR}/effect.cpp
     ${CMAKE_CURRENT_LIST_DIR}/effect.h
+    ${CMAKE_CURRENT_LIST_DIR}/creatureghost.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/creatureghost.h
     ${CMAKE_CURRENT_LIST_DIR}/game.cpp
     ${CMAKE_CURRENT_LIST_DIR}/game.h
     ${CMAKE_CURRENT_LIST_DIR}/item.cpp

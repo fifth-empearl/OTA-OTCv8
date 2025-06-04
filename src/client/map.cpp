@@ -27,6 +27,7 @@
 #include "item.h"
 #include "missile.h"
 #include "statictext.h"
+#include "creatureghost.h"
 #include "mapview.h"
 #include "minimap.h"
 
@@ -110,6 +111,7 @@ void Map::cleanDynamicThings()
         m_floorMissiles[i].clear();
 
     cleanTexts();
+    m_creatureGhosts.clear();
 }
 
 void Map::cleanTexts()

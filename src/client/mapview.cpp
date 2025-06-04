@@ -287,6 +287,17 @@ void MapView::drawMapForeground(const Rect& rect)
         c.first->drawInformation(c.second, g_map.isCovered(c.first->getPrewalkingPosition(), m_cachedFirstVisibleFloor), rect, flags);
     }
 
+    for (const CreatureGhostPtr& ghost : g_map.getCreatureGhosts()) {
+        Position pos = ghost->getPosition();
+        if (pos.z != cameraPosition.z)
+            continue;
+        Point p = transformPositionTo2D(pos, cameraPosition) - drawOffset;
+        p.x *= horizontalStretchFactor;
+        p.y *= verticalStretchFactor;
+        p += rect.topLeft();
+        ghost->draw(p, true, m_lightView.get());
+    }
+
     if (m_lightView) {
         g_drawQueue->add(m_lightView.release());
     }
