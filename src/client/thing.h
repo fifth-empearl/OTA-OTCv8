@@ -68,6 +68,7 @@ public:
     virtual bool isPlayer() { return false; }
     virtual bool isLocalPlayer() { return false; }
     virtual bool isAnimatedText() { return false; }
+    virtual bool isAnimatedItemText() { return false; }
     virtual bool isStaticText() { return false; }
 
     // type shortcuts

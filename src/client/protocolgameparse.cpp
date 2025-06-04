@@ -30,6 +30,7 @@
 #include "item.h"
 #include "effect.h"
 #include "missile.h"
+#include "animateditemtext.h"
 #include "tile.h"
 #include "luavaluecasts_client.h"
 #include <framework/core/eventdispatcher.h>
@@ -395,6 +396,9 @@ void ProtocolGame::parseMessage(const InputMessagePtr& msg)
                 break;
             case Proto::GameServerStoreCompletePurchase:
                 parseCompleteStorePurchase(msg);
+                break;
+            case Proto::GameServerAnimatedItemText:
+                parseAnimatedItemText(msg);
                 break;
             case Proto::GameServerStore:
                 parseStore(msg);
@@ -1536,6 +1540,24 @@ void ProtocolGame::parseAnimatedText(const InputMessagePtr& msg)
         animatedText->setFont(font);
 
     g_map.addThing(animatedText, position);
+}
+
+void ProtocolGame::parseAnimatedItemText(const InputMessagePtr& msg)
+{
+    Position position = getPosition(msg);
+    int itemId = msg->getU16();
+    std::string font;
+    if(g_game.getFeature(Otc::GameAnimatedTextCustomFont))
+        font = msg->getString();
+    std::string text = msg->getString();
+
+    AnimatedItemTextPtr ait = std::make_shared<AnimatedItemText>();
+    ait->setItemId(itemId);
+    ait->setText(text);
+    if(font.size())
+        ait->setFont(font);
+
+    g_map.addThing(ait, position);
 }
 
 void ProtocolGame::parseDistanceMissile(const InputMessagePtr& msg)

@@ -27,6 +27,7 @@
 #include "tile.h"
 #include "statictext.h"
 #include "animatedtext.h"
+#include "animateditemtext.h"
 #include "missile.h"
 #include "lightview.h"
 #include "localplayer.h"
@@ -327,6 +328,22 @@ void MapView::drawMapForeground(const Rect& rect)
         p.y *= verticalStretchFactor;
         p += rect.topLeft();
         animatedText->drawText(p, rect);
+        if (--limit == 0)
+            break;
+    }
+
+    limit = g_adaptiveRenderer.textsLimit();
+    for (const AnimatedItemTextPtr& ait : g_map.getAnimatedItemTexts()) {
+        Position pos = ait->getPosition();
+
+        if (pos.z != cameraPosition.z)
+            continue;
+
+        Point p = transformPositionTo2D(pos, cameraPosition) - drawOffset + Point(16, 8) * g_sprites.getOffsetFactor();
+        p.x *= horizontalStretchFactor;
+        p.y *= verticalStretchFactor;
+        p += rect.topLeft();
+        ait->drawText(p, rect);
         if (--limit == 0)
             break;
     }
