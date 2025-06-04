@@ -32,6 +32,7 @@
 #include "missile.h"
 #include "statictext.h"
 #include "animatedtext.h"
+#include "animateditemtext.h"
 #include "creature.h"
 #include "player.h"
 #include "localplayer.h"

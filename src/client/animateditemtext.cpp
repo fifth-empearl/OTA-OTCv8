@@ -27,14 +27,17 @@ void AnimatedItemText::drawText(const Point& dest, const Rect& visibleRect)
 
     const Size itemSize(g_sprites.spriteSize(), g_sprites.spriteSize());
     Rect itemRect(p, itemSize);
-    if(visibleRect.contains(itemRect)) {
+    if (visibleRect.contains(itemRect)) {
         m_item->setColor(color);
         m_item->draw(p);
         m_item->setColor(Color::alpha);
     }
 
-    Rect textRect(p + Point(itemSize.width() + 2, 0), m_cachedText.getTextSize());
-    if(visibleRect.contains(textRect)) {
+    Size textSize = m_cachedText.getTextSize();
+    Point textOffset((itemSize.width() - textSize.width()) / 2,
+                     (itemSize.height() - textSize.height()) / 2);
+    Rect textRect(p + textOffset, textSize);
+    if (visibleRect.contains(textRect)) {
         m_cachedText.draw(textRect, color);
     }
 }
