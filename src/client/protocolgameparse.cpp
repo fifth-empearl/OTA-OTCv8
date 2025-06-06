@@ -36,6 +36,7 @@
 #include <framework/core/eventdispatcher.h>
 #include <framework/util/extras.h>
 #include <framework/stdext/string.h>
+#include <memory>
 
 void ProtocolGame::parseMessage(const InputMessagePtr& msg)
 {
@@ -3563,6 +3564,15 @@ CreaturePtr ProtocolGame::getCreature(const InputMessagePtr& msg, int type)
 
             if (creature == m_localPlayer && !m_localPlayer->isKnown())
                 m_localPlayer->setKnown(true);
+
+            uint8 lineCount = msg->getU8();
+            for (uint8 i = 0; i < lineCount; ++i) {
+                uint32 fromId = msg->getU32();
+                uint32 toId = msg->getU32();
+                std::string lineName = msg->getString();
+                Color lineColor(msg->getU8(), msg->getU8(), msg->getU8());
+                g_map.addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, lineName, lineColor));
+            }
         }
     } else if (type == Proto::Creature) {
         uint id = msg->getU32();
