@@ -133,6 +133,7 @@ public:
     bool isWrapable() { return rawGetThingType()->isWrapable(); }
     bool isUnwrapable() { return rawGetThingType()->isUnwrapable(); }
     bool isTopEffect() { return rawGetThingType()->isTopEffect(); }
+    bool isBottomEffect() { return rawGetThingType()->isBottomEffect(); }
     MarketData getMarketData() { return rawGetThingType()->getMarketData(); }
 
     void hide() { m_hidden = true; }

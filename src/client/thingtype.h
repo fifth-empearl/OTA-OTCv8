@@ -257,6 +257,7 @@ public:
     bool isWrapable() { return m_attribs.has(ThingAttrWrapable); }
     bool isUnwrapable() { return m_attribs.has(ThingAttrUnwrapable); }
     bool isTopEffect() { return m_attribs.has(ThingAttrTopEffect); }
+    bool isBottomEffect() { return m_bottomEffect; }
     bool hasBones() { return m_attribs.has(ThingAttrBones); }
 
     std::vector<int> getSprites() { return m_spritesIndex; }
@@ -290,6 +291,7 @@ private:
     int m_elevation;
     float m_opacity;
     std::string m_customImage;
+    bool m_bottomEffect = false;
 
     std::vector<int> m_spritesIndex;
     std::vector<TexturePtr> m_textures;
