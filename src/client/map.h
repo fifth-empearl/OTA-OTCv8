@@ -30,8 +30,10 @@
 #include "animatedtext.h"
 #include "statictext.h"
 #include "tile.h"
+#include "creatureline.h"
 
 #include <framework/core/clock.h>
+#include <unordered_map>
 
 enum OTBM_ItemAttr
 {
@@ -262,7 +264,9 @@ public:
     const std::vector<CreatureLinePtr>& getCreatureLines() { return m_creatureLines; }
     void addCreatureLine(const CreatureLinePtr& line);
     void removeCreatureLinesFor(uint32 id);
-    void createCreatureLine(uint32 fromId, uint32 toId, const std::string& name, const Color& color);
+    void createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId);
+    void defineCreatureLineType(uint32 lineId, const std::string& image, const Color& color,
+                                bool stretched, bool antialias);
     void clearCreatureLines();
 
     std::vector<AnimatedTextPtr> getAnimatedTexts() { return m_animatedTexts; }
@@ -291,6 +295,7 @@ private:
     std::vector<AnimatedTextPtr> m_animatedTexts;
     std::vector<StaticTextPtr> m_staticTexts;
     std::vector<CreatureLinePtr> m_creatureLines;
+    std::unordered_map<uint32, CreatureLineType> m_creatureLineTypes;
     std::vector<MapViewPtr> m_mapViews;
     std::unordered_map<Position, std::string, PositionHasher> m_waypoints;
 

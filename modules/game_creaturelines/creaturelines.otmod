@@ -1,0 +1,10 @@
+Module
+  name: game_creaturelines
+  description: Creature line definitions
+  author: codex
+  scripts: [ creaturelines ]
+  sandboxed: true
+  autoload: true
+  autoload-priority: 700
+  @onLoad: init()
+  @onUnload: terminate()

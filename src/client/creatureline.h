@@ -8,10 +8,19 @@
 
 class MapView;
 
+struct CreatureLineType
+{
+    std::string image;
+    Color color{Color::white};
+    bool stretched{true};
+    bool antialias{true};
+    TexturePtr texture;
+};
+
 class CreatureLine
 {
 public:
-    CreatureLine(uint32 fromId, uint32 toId, const std::string& name, const Color& color);
+    CreatureLine(uint32 fromId, uint32 toId, CreatureLineType* type);
 
     uint32 getFromId() const { return m_fromId; }
     uint32 getToId() const { return m_toId; }
@@ -20,11 +29,9 @@ public:
               float hFactor, float vFactor);
 
 private:
-    uint32 m_fromId;
-    uint32 m_toId;
-    std::string m_name;
-    Color m_color;
-    TexturePtr m_texture;
+    uint32 m_fromId{0};
+    uint32 m_toId{0};
+    CreatureLineType* m_type{nullptr};
 };
 
 using CreatureLinePtr = std::shared_ptr<CreatureLine>;

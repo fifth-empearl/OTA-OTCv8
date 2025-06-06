@@ -176,6 +176,7 @@ void Client::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_map", "checkSightLine", &Map::checkSightLine, &g_map);
     g_lua.bindSingletonFunction("g_map", "isSightClear", &Map::isSightClear, &g_map);
     g_lua.bindSingletonFunction("g_map", "createCreatureLine", &Map::createCreatureLine, &g_map);
+    g_lua.bindSingletonFunction("g_map", "defineCreatureLineType", &Map::defineCreatureLineType, &g_map);
     g_lua.bindSingletonFunction("g_map", "removeCreatureLinesFor", &Map::removeCreatureLinesFor, &g_map);
     g_lua.bindSingletonFunction("g_map", "clearCreatureLines", &Map::clearCreatureLines, &g_map);
 

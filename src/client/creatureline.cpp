@@ -5,15 +5,25 @@
 #include "spritemanager.h"
 #include "game.h"
 #include <framework/graphics/drawqueue.h>
+#include <framework/graphics/coordsbuffer.h>
 #include <cmath>
 
-CreatureLine::CreatureLine(uint32 fromId, uint32 toId, const std::string& name, const Color& color)
-    : m_fromId(fromId), m_toId(toId), m_name(name), m_color(color)
+CreatureLine::CreatureLine(uint32 fromId, uint32 toId, CreatureLineType* type)
+    : m_fromId(fromId), m_toId(toId), m_type(type)
 {
-    std::string file = "images/lines/" + name + ".png";
-    m_texture = g_textures.getTexture(file);
-    if (!m_texture)
-        m_texture = g_textures.getTexture("images/lines/white.png");
+    if (!m_type)
+        return;
+
+    if (!m_type->texture) {
+        std::string file = m_type->image.empty() ? "images/lines/white.png" : m_type->image;
+        m_type->texture = g_textures.getTexture(file);
+        if (!m_type->texture)
+            m_type->texture = g_textures.getTexture("images/lines/white.png");
+        if (m_type->texture) {
+            m_type->texture->setSmooth(m_type->antialias);
+            m_type->texture->setRepeat(!m_type->stretched);
+        }
+    }
 }
 
 void CreatureLine::draw(MapView* mapView, const Rect& rect, const Position& cameraPos, const Point& drawOffset,
@@ -45,10 +55,21 @@ void CreatureLine::draw(MapView* mapView, const Rect& rect, const Position& came
     if (len < 1.f)
         return;
 
-    Size texSize = m_texture->getSize();
+    if (!m_type || !m_type->texture)
+        return;
+
+    Size texSize = m_type->texture->getSize();
     Rect dest(a - Point(texSize.width() / 2, 0), Size(texSize.width(), len));
     size_t start = g_drawQueue->size();
-    g_drawQueue->addTexturedRect(dest, m_texture, Rect(0, 0, texSize), m_color);
+
+    if (m_type->stretched) {
+        g_drawQueue->addTexturedRect(dest, m_type->texture, Rect(0, 0, texSize), m_type->color);
+    } else {
+        CoordsBuffer coords;
+        coords.addRepeatedRects(dest, Rect(0, 0, texSize));
+        g_drawQueue->addTextureCoords(coords, m_type->texture, m_type->color);
+    }
+
     float angle = std::atan2(dy, dx) - Fw::pi / 2.f;
     g_drawQueue->setRotation(start, a, angle);
 }

@@ -3135,10 +3135,9 @@ void ProtocolGame::parseCreatureLine(const InputMessagePtr& msg)
 {
     uint32 fromId = msg->getU32();
     uint32 toId = msg->getU32();
-    std::string name = msg->getString();
-    Color color(msg->getU8(), msg->getU8(), msg->getU8());
+    uint32 lineId = msg->getU16();
 
-    g_map.addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, name, color));
+    g_map.createCreatureLine(fromId, toId, lineId);
 }
 
 void ProtocolGame::parseFeatures(const InputMessagePtr& msg)
@@ -3569,9 +3568,8 @@ CreaturePtr ProtocolGame::getCreature(const InputMessagePtr& msg, int type)
             for (uint8 i = 0; i < lineCount; ++i) {
                 uint32 fromId = msg->getU32();
                 uint32 toId = msg->getU32();
-                std::string lineName = msg->getString();
-                Color lineColor(msg->getU8(), msg->getU8(), msg->getU8());
-                g_map.addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, lineName, lineColor));
+                uint32 lineId = msg->getU16();
+                g_map.createCreatureLine(fromId, toId, lineId);
             }
         }
     } else if (type == Proto::Creature) {

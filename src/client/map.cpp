@@ -305,9 +305,23 @@ void Map::removeCreatureLinesFor(uint32 id)
     }
 }
 
-void Map::createCreatureLine(uint32 fromId, uint32 toId, const std::string& name, const Color& color)
+void Map::createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId)
 {
-    addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, name, color));
+    auto it = m_creatureLineTypes.find(lineId);
+    if (it == m_creatureLineTypes.end())
+        return;
+    addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, &it->second));
+}
+
+void Map::defineCreatureLineType(uint32 lineId, const std::string& image, const Color& color,
+                                bool stretched, bool antialias)
+{
+    CreatureLineType& t = m_creatureLineTypes[lineId];
+    t.image = image;
+    t.color = color;
+    t.stretched = stretched;
+    t.antialias = antialias;
+    t.texture = nullptr; // will be loaded lazily
 }
 
 void Map::clearCreatureLines()
