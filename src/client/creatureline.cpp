@@ -8,8 +8,8 @@
 #include <framework/graphics/coordsbuffer.h>
 #include <cmath>
 
-CreatureLine::CreatureLine(uint32 fromId, uint32 toId, CreatureLineType* type)
-    : m_fromId(fromId), m_toId(toId), m_type(type)
+CreatureLine::CreatureLine(uint32 fromId, uint32 toId, uint32 typeId, CreatureLineType* type)
+    : m_fromId(fromId), m_toId(toId), m_typeId(typeId), m_type(type)
 {
     if (!m_type)
         return;

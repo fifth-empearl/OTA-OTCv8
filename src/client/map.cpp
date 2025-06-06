@@ -292,6 +292,10 @@ void Map::addCreatureLine(const CreatureLinePtr& line)
 {
     if (!line)
         return;
+    for (const CreatureLinePtr& existing : m_creatureLines) {
+        if (existing->getFromId() == line->getFromId() && existing->getToId() == line->getToId() && existing->getTypeId() == line->getTypeId())
+            return;
+    }
     m_creatureLines.push_back(line);
 }
 
@@ -310,15 +314,21 @@ void Map::createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId)
     auto it = m_creatureLineTypes.find(lineId);
     if (it == m_creatureLineTypes.end())
         return;
-    addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, &it->second));
+
+    for (const CreatureLinePtr& existing : m_creatureLines) {
+        if (existing->getFromId() == fromId && existing->getToId() == toId && existing->getTypeId() == lineId)
+            return;
+    }
+
+    addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, lineId, &it->second));
 }
 
-void Map::defineCreatureLineType(uint32 lineId, const std::string& image, const Color& color,
+void Map::defineCreatureLineType(uint32 lineId, const std::string& image, int r, int g, int b, int a,
                                 bool stretched, bool antialias)
 {
     CreatureLineType& t = m_creatureLineTypes[lineId];
     t.image = image;
-    t.color = color;
+    t.color = Color(r, g, b, a);
     t.stretched = stretched;
     t.antialias = antialias;
     t.texture = nullptr; // will be loaded lazily
