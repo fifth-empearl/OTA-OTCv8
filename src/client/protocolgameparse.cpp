@@ -30,6 +30,7 @@
 #include "item.h"
 #include "effect.h"
 #include "missile.h"
+#include "creatureline.h"
 #include "tile.h"
 #include "luavaluecasts_client.h"
 #include <framework/core/eventdispatcher.h>
@@ -526,6 +527,9 @@ void ProtocolGame::parseMessage(const InputMessagePtr& msg)
                 break;
             case Proto::GameServerProgressBar:
                 parseProgressBar(msg);
+                break;
+            case Proto::GameServerCreatureLine:
+                parseCreatureLine(msg);
                 break;
             case Proto::GameServerFeatures:
                 parseFeatures(msg);
@@ -3124,6 +3128,16 @@ void ProtocolGame::parseProgressBar(const InputMessagePtr& msg)
         creature->setProgressBar(duration, ltr);
     else
         g_logger.traceError(stdext::format("could not get creature with id %d", id));
+}
+
+void ProtocolGame::parseCreatureLine(const InputMessagePtr& msg)
+{
+    uint32 fromId = msg->getU32();
+    uint32 toId = msg->getU32();
+    std::string name = msg->getString();
+    Color color(msg->getU8(), msg->getU8(), msg->getU8());
+
+    g_map.addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, name, color));
 }
 
 void ProtocolGame::parseFeatures(const InputMessagePtr& msg)

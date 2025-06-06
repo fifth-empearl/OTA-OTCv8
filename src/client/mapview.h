@@ -30,6 +30,8 @@
 #include <framework/core/declarations.h>
 #include "lightview.h"
 
+class CreatureLine;
+
 // @bindclass
 class MapView : public LuaObject
 {
@@ -52,6 +54,7 @@ protected:
     void onMapCenterChange(const Position& pos);
 
     friend class Map;
+    friend class CreatureLine;
 
 public:
     // floor visibility related

@@ -122,4 +122,7 @@ class HealthBar;
 
 using HealthBarPtr = std::shared_ptr<HealthBar>;
 
+class CreatureLine;
+using CreatureLinePtr = std::shared_ptr<CreatureLine>;
+
 #endif

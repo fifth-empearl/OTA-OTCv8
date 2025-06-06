@@ -259,6 +259,11 @@ public:
     int getFirstAwareFloor();
     int getLastAwareFloor();
     const std::vector<MissilePtr>& getFloorMissiles(int z) { return m_floorMissiles[z]; }
+    const std::vector<CreatureLinePtr>& getCreatureLines() { return m_creatureLines; }
+    void addCreatureLine(const CreatureLinePtr& line);
+    void removeCreatureLinesFor(uint32 id);
+    void createCreatureLine(uint32 fromId, uint32 toId, const std::string& name, const Color& color);
+    void clearCreatureLines();
 
     std::vector<AnimatedTextPtr> getAnimatedTexts() { return m_animatedTexts; }
     std::vector<StaticTextPtr> getStaticTexts() { return m_staticTexts; }
@@ -285,6 +290,7 @@ private:
     std::array<std::vector<MissilePtr>, Otc::MAX_Z+1> m_floorMissiles;
     std::vector<AnimatedTextPtr> m_animatedTexts;
     std::vector<StaticTextPtr> m_staticTexts;
+    std::vector<CreatureLinePtr> m_creatureLines;
     std::vector<MapViewPtr> m_mapViews;
     std::unordered_map<Position, std::string, PositionHasher> m_waypoints;
 
