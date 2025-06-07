@@ -14,6 +14,7 @@ struct CreatureLineType
     Color color{Color::white};
     bool stretched{true};
     bool antialias{true};
+    std::string shader;
     TexturePtr texture;
 };
 

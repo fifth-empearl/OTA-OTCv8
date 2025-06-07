@@ -266,7 +266,7 @@ public:
     void removeCreatureLinesFor(uint32 id);
     void createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId);
     void defineCreatureLineType(uint32 lineId, const std::string& image, int r, int g, int b, int a,
-                                bool stretched, bool antialias);
+                                bool stretched, bool antialias, const std::string& shader = "");
     void clearCreatureLines();
 
     std::vector<AnimatedTextPtr> getAnimatedTexts() { return m_animatedTexts; }

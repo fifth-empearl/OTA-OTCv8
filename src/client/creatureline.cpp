@@ -63,11 +63,21 @@ void CreatureLine::draw(MapView* mapView, const Rect& rect, const Position& came
     size_t start = g_drawQueue->size();
 
     if (m_type->stretched) {
-        g_drawQueue->addTexturedRect(dest, m_type->texture, Rect(0, 0, texSize), m_type->color);
+        CoordsBuffer coords;
+        coords.addRect(dest, Rect(0, 0, texSize));
+        if (!m_type->shader.empty()) {
+            g_drawQueue->add(new DrawQueueItemImageWithShader(coords, m_type->texture, m_type->color, m_type->shader));
+        } else {
+            g_drawQueue->addTexturedRect(dest, m_type->texture, Rect(0, 0, texSize), m_type->color);
+        }
     } else {
         CoordsBuffer coords;
         coords.addRepeatedRects(dest, Rect(0, 0, texSize));
-        g_drawQueue->addTextureCoords(coords, m_type->texture, m_type->color);
+        if (!m_type->shader.empty()) {
+            g_drawQueue->add(new DrawQueueItemImageWithShader(coords, m_type->texture, m_type->color, m_type->shader));
+        } else {
+            g_drawQueue->addTextureCoords(coords, m_type->texture, m_type->color);
+        }
     }
 
     float angle = std::atan2(dy, dx) - Fw::pi / 2.f;

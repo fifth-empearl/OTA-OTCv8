@@ -324,13 +324,14 @@ void Map::createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId)
 }
 
 void Map::defineCreatureLineType(uint32 lineId, const std::string& image, int r, int g, int b, int a,
-                                bool stretched, bool antialias)
+                                bool stretched, bool antialias, const std::string& shader)
 {
     CreatureLineType& t = m_creatureLineTypes[lineId];
     t.image = image;
     t.color = Color(r, g, b, a);
     t.stretched = stretched;
     t.antialias = antialias;
+    t.shader = shader;
     t.texture = nullptr; // will be loaded lazily
 }
 
