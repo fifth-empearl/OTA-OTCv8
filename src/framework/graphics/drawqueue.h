@@ -131,6 +131,22 @@ struct DrawQueueItemTextColored : public DrawQueueItem {
     bool m_shadow = false;
 };
 
+struct DrawQueueItemTextWithShader : public DrawQueueItemText {
+    DrawQueueItemTextWithShader(const Point& point, const TexturePtr& texture, uint64_t hash, const Color& color, const std::string& shader, bool shadow = false) :
+        DrawQueueItemText(point, texture, hash, color, shadow), m_shader(shader) {}
+    void draw() override;
+
+    std::string m_shader;
+};
+
+struct DrawQueueItemTextColoredWithShader : public DrawQueueItemTextColored {
+    DrawQueueItemTextColoredWithShader(const Point& point, const TexturePtr& texture, uint64_t hash, const std::vector<std::pair<int, Color>>& colors, const std::string& shader, bool shadow = false) :
+        DrawQueueItemTextColored(point, texture, hash, colors, shadow), m_shader(shader) {}
+    void draw() override;
+
+    std::string m_shader;
+};
+
 struct DrawQueueItemLine : public DrawQueueItem {
     DrawQueueItemLine(const std::vector<Point>& points, int width, const Color& color) :
         DrawQueueItem(nullptr, color), m_points(points), m_width(width)
@@ -235,6 +251,8 @@ public:
     }
     void addText(BitmapFontPtr font, const std::string& text, const Rect& screenCoords, Fw::AlignmentFlag align = Fw::AlignTopLeft, const Color& color = Color::white, bool shadow = false);
     void addColoredText(BitmapFontPtr font, const std::string& text, const Rect& screenCoords, Fw::AlignmentFlag align, const std::vector<std::pair<int, Color>>& colors, bool shadow = false);
+    void addTextWithShader(BitmapFontPtr font, const std::string& text, const Rect& screenCoords, Fw::AlignmentFlag align, const Color& color, const std::string& shader, bool shadow = false);
+    void addColoredTextWithShader(BitmapFontPtr font, const std::string& text, const Rect& screenCoords, Fw::AlignmentFlag align, const std::vector<std::pair<int, Color>>& colors, const std::string& shader, bool shadow = false);
 
     void addFilledTriangle(const Point& a, const Point& b, const Point& c, const Color& color = Color::white)
     {

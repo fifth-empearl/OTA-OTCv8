@@ -107,6 +107,8 @@ void UIWidget::parseTextStyle(const OTMLNodePtr& styleNode)
             setTextOverflowLength(node->value<uint16>());
         else if (node->tag() == "text-overflow-character")
             setTextOverflowCharacter(node->value<>());
+        else if (node->tag() == "text-shader")
+            setTextShader(node->value());
     }
 }
 
@@ -125,9 +127,15 @@ void UIWidget::drawText(const Rect& screenCoords)
     }
 
     if (!m_drawTextColors.empty()) {
-        m_font->drawColoredText(m_drawText, m_textCachedScreenCoords, m_textAlign, m_drawTextColors, m_shadow);
+        if (!m_textShader.empty())
+            g_drawQueue->addColoredTextWithShader(m_font, m_drawText, m_textCachedScreenCoords, m_textAlign, m_drawTextColors, m_textShader, m_shadow);
+        else
+            m_font->drawColoredText(m_drawText, m_textCachedScreenCoords, m_textAlign, m_drawTextColors, m_shadow);
     } else {
-        m_font->drawText(m_drawText, m_textCachedScreenCoords, m_textAlign, m_color, m_shadow);
+        if (!m_textShader.empty())
+            g_drawQueue->addTextWithShader(m_font, m_drawText, m_textCachedScreenCoords, m_textAlign, m_color, m_textShader, m_shadow);
+        else
+            m_font->drawText(m_drawText, m_textCachedScreenCoords, m_textAlign, m_color, m_shadow);
     }
 
     if (m_textUnderline.getVertexCount() > 0)

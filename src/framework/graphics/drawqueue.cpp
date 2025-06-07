@@ -142,6 +142,30 @@ void DrawQueueItemTextColored::draw()
     g_text.drawColoredText(m_point, m_hash, m_colors, m_shadow);
 }
 
+void DrawQueueItemTextWithShader::draw()
+{
+    PainterShaderProgramPtr shader = g_shaders.getShader(m_shader);
+    if (shader) {
+        g_painter->setShaderProgram(shader);
+        shader->bindMultiTextures();
+    }
+    g_text.drawText(m_point, m_hash, m_color, m_shadow);
+    if (shader)
+        g_painter->resetShaderProgram();
+}
+
+void DrawQueueItemTextColoredWithShader::draw()
+{
+    PainterShaderProgramPtr shader = g_shaders.getShader(m_shader);
+    if (shader) {
+        g_painter->setShaderProgram(shader);
+        shader->bindMultiTextures();
+    }
+    g_text.drawColoredText(m_point, m_hash, m_colors, m_shadow);
+    if (shader)
+        g_painter->resetShaderProgram();
+}
+
 void::DrawQueueItemLine::draw()
 {
     g_painter->setColor(m_color);
@@ -224,6 +248,20 @@ void DrawQueue::addColoredText(BitmapFontPtr font, const std::string& text, cons
     if (!font || text.empty()) return;
     uint64_t hash = g_text.addText(font, text, screenCoords.size(), align);
     m_queue.push_back(new DrawQueueItemTextColored(screenCoords.topLeft(), font->getTexture(), hash, colors, shadow));
+}
+
+void DrawQueue::addTextWithShader(BitmapFontPtr font, const std::string& text, const Rect& screenCoords, Fw::AlignmentFlag align, const Color& color, const std::string& shader, bool shadow)
+{
+    if (!font || text.empty()) return;
+    uint64_t hash = g_text.addText(font, text, screenCoords.size(), align);
+    m_queue.push_back(new DrawQueueItemTextWithShader(screenCoords.topLeft(), font->getTexture(), hash, color, shader, shadow));
+}
+
+void DrawQueue::addColoredTextWithShader(BitmapFontPtr font, const std::string& text, const Rect& screenCoords, Fw::AlignmentFlag align, const std::vector<std::pair<int, Color>>& colors, const std::string& shader, bool shadow)
+{
+    if (!font || text.empty()) return;
+    uint64_t hash = g_text.addText(font, text, screenCoords.size(), align);
+    m_queue.push_back(new DrawQueueItemTextColoredWithShader(screenCoords.topLeft(), font->getTexture(), hash, colors, shader, shadow));
 }
 
 void DrawQueue::correctOutfit(const Rect& dest, int fromPos, bool oldScaling, bool center)

@@ -574,6 +574,7 @@ protected:
     std::vector<TextEvent> m_textEvents;
     std::vector<std::pair<Rect, std::string>> m_rectToWord;
     CoordsBuffer m_textUnderline;
+    std::string m_textShader;
 
 public:
     void resizeToText() { setSize(getTextSize()); }
@@ -590,6 +591,7 @@ public:
     void setTextOnlyUpperCase(bool textOnlyUpperCase) { m_textOnlyUpperCase = textOnlyUpperCase; setText(m_text); }
     void setFont(const std::string& fontName);
     void setShadow(bool shadow) { m_shadow = shadow; }
+    void setTextShader(const std::string& shader) { m_textShader = shader; }
     void setTextOverflowLength(uint16 length) { m_textOverflowLength = length; updateText(); }
     void setTextOverflowCharacter(std::string character) { m_textOverflowCharacter = character; updateText(); }
 
@@ -598,6 +600,7 @@ public:
     Fw::AlignmentFlag getTextAlign() { return m_textAlign; }
     Point getTextOffset() { return m_textOffset; }
     bool getTextWrap() { return m_textWrap; }
+    std::string getTextShader() { return m_textShader; }
     std::string getFont() { return m_font->getName(); }
     Size getTextSize() { return m_font->calculateTextRectSize(m_drawText); }
     std::string getTextByPos(const Point& mousePos);

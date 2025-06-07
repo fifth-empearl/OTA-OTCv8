@@ -686,6 +686,7 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("setImageRepeated", &UIWidget::setImageRepeated);
     g_lua.bindClassMemberFunction<UIWidget>("setImageSmooth", &UIWidget::setImageSmooth);
     g_lua.bindClassMemberFunction<UIWidget>("setImageAutoResize", &UIWidget::setImageAutoResize);
+    g_lua.bindClassMemberFunction<UIWidget>("setImageShader", &UIWidget::setImageShader);
     g_lua.bindClassMemberFunction<UIWidget>("setImageBorderTop", &UIWidget::setImageBorderTop);
     g_lua.bindClassMemberFunction<UIWidget>("setImageBorderRight", &UIWidget::setImageBorderRight);
     g_lua.bindClassMemberFunction<UIWidget>("setImageBorderBottom", &UIWidget::setImageBorderBottom);
@@ -705,6 +706,7 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("isImageFixedRatio", &UIWidget::isImageFixedRatio);
     g_lua.bindClassMemberFunction<UIWidget>("isImageSmooth", &UIWidget::isImageSmooth);
     g_lua.bindClassMemberFunction<UIWidget>("isImageAutoResize", &UIWidget::isImageAutoResize);
+    g_lua.bindClassMemberFunction<UIWidget>("getImageShader", &UIWidget::getImageShader);
     g_lua.bindClassMemberFunction<UIWidget>("getImageBorderTop", &UIWidget::getImageBorderTop);
     g_lua.bindClassMemberFunction<UIWidget>("getImageBorderRight", &UIWidget::getImageBorderRight);
     g_lua.bindClassMemberFunction<UIWidget>("getImageBorderBottom", &UIWidget::getImageBorderBottom);
@@ -727,9 +729,11 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("getTextAlign", &UIWidget::getTextAlign);
     g_lua.bindClassMemberFunction<UIWidget>("getTextOffset", &UIWidget::getTextOffset);
     g_lua.bindClassMemberFunction<UIWidget>("getTextWrap", &UIWidget::getTextWrap);
+    g_lua.bindClassMemberFunction<UIWidget>("getTextShader", &UIWidget::getTextShader);
     g_lua.bindClassMemberFunction<UIWidget>("getFont", &UIWidget::getFont);
     g_lua.bindClassMemberFunction<UIWidget>("getTextSize", &UIWidget::getTextSize);
     g_lua.bindClassMemberFunction<UIWidget>("setShadow", &UIWidget::setShadow);
+    g_lua.bindClassMemberFunction<UIWidget>("setTextShader", &UIWidget::setTextShader);
     g_lua.bindClassMemberFunction<UIWidget>("setCursor", &UIWidget::setCursor);
     g_lua.bindClassMemberFunction<UIWidget>("setChangeCursorImage", &UIWidget::setChangeCursorImage);
     g_lua.bindClassMemberFunction<UIWidget>("getTextByPos", &UIWidget::getTextByPos);
