@@ -352,6 +352,10 @@ void Client::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_game", "isTileThingLuaCallbackEnabled", &Game::isTileThingLuaCallbackEnabled, &g_game);
     g_lua.bindSingletonFunction("g_game", "getRecivedPacketsCount", &Game::getRecivedPacketsCount, &g_game);
     g_lua.bindSingletonFunction("g_game", "getRecivedPacketsSize", &Game::getRecivedPacketsSize, &g_game);
+    g_lua.bindSingletonFunction("g_game", "setSelfSummonOpacity", &Game::setSelfSummonOpacity, &g_game);
+    g_lua.bindSingletonFunction("g_game", "getSelfSummonOpacity", &Game::getSelfSummonOpacity, &g_game);
+    g_lua.bindSingletonFunction("g_game", "setOtherSummonOpacity", &Game::setOtherSummonOpacity, &g_game);
+    g_lua.bindSingletonFunction("g_game", "getOtherSummonOpacity", &Game::getOtherSummonOpacity, &g_game);
 
     g_lua.registerSingletonClass("g_healthBars");
     g_lua.bindSingletonFunction("g_healthBars", "addHealthBackground", &HealthBars::addHealthBackground, &g_healthBars);

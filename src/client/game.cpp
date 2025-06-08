@@ -94,6 +94,8 @@ void Game::resetGameStates()
     m_walkPrediction = 0;
     m_coins = 0;
     m_transferableCoins = 0;
+    m_selfSummonOpacity = 1.f;
+    m_otherSummonOpacity = 1.f;
     m_newPingIds.clear();
     m_unjustifiedPoints = UnjustifiedPoints();
 

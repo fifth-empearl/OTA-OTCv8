@@ -33,6 +33,7 @@
 #include "localplayer.h"
 #include "outfit.h"
 #include <framework/core/timer.h>
+#include <framework/stdext/math.h>
 
 #include <bitset>
 
@@ -418,6 +419,12 @@ public:
         return m_protocolGame ? m_protocolGame->getRecivedPacketsSize() : 0;
     }
 
+    void setSelfSummonOpacity(float opacity) { m_selfSummonOpacity = stdext::clamp<float>(opacity, 0.f, 1.f); }
+    float getSelfSummonOpacity() { return m_selfSummonOpacity; }
+
+    void setOtherSummonOpacity(float opacity) { m_otherSummonOpacity = stdext::clamp<float>(opacity, 0.f, 1.f); }
+    float getOtherSummonOpacity() { return m_otherSummonOpacity; }
+
 protected:
     void enableBotCall() { m_denyBotCall = false; }
     void disableBotCall() { m_denyBotCall = true; }
@@ -477,6 +484,9 @@ private:
     bool m_showRealDirection = false;
     bool m_ignoreServerDirection = true;
     bool m_tileThingsLuaCallback = false;
+
+    float m_selfSummonOpacity = 1.f;
+    float m_otherSummonOpacity = 1.f;
 };
 
 extern Game g_game;
