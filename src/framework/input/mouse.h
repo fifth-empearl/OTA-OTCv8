@@ -36,11 +36,14 @@ public:
     void pushCursor(const std::string& name);
     void popCursor(const std::string& name);
     bool isCursorChanged();
+    void setDefaultCursor(const std::string& name) { m_defaultCursor = name; }
+    std::string getDefaultCursor() { return m_defaultCursor; }
     bool isPressed(Fw::MouseButton mouseButton);
 
 private:
     std::map<std::string, int> m_cursors;
     std::deque<int> m_cursorStack;
+    std::string m_defaultCursor;
     std::mutex m_mutex;
 };
 

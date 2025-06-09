@@ -29,6 +29,7 @@
 #include <framework/graphics/image.h>
 #include <framework/util/stats.h>
 #include <unistd.h>
+#include <X11/Xcursor/Xcursor.h>
 
 #define LSB_BIT_SET(p, n) (p[(n)/8] |= (1 <<((n)%8)))
 
@@ -940,8 +941,25 @@ int X11Window::internalLoadMouseCursor(const ImagePtr& image, const Point& hotSp
 {
     int width = image->getWidth();
     int height = image->getHeight();
+
+    if (XcursorSupportsARGB(m_display)) {
+        XcursorImage* ximage = XcursorImageCreate(width, height);
+        if (ximage) {
+            ximage->xhot = hotSpot.x;
+            ximage->yhot = hotSpot.y;
+            for (int i = 0; i < width * height; ++i)
+                ximage->pixels[i] = stdext::readULE32(image->getPixelData() + i * 4);
+            Cursor cur = XcursorImageLoadCursor(m_display, ximage);
+            XcursorImageDestroy(ximage);
+            if (cur != None) {
+                m_cursors.push_back(cur);
+                return m_cursors.size() - 1;
+            }
+        }
+    }
+
     int numbits = width * height;
-    int numbytes = (width * height)/8;
+    int numbytes = (width * height) / 8;
 
     XColor bg, fg;
     bg.red   = 255 << 8;
@@ -956,12 +974,12 @@ int X11Window::internalLoadMouseCursor(const ImagePtr& image, const Point& hotSp
 
     for(int i=0;i<numbits;++i) {
         uint32 rgba = stdext::readULE32(image->getPixelData() + i*4);
-        if(rgba == 0xffffffff) { //white, background
+        if(rgba == 0xffffffff) {
             LSB_BIT_SET(maskBits, i);
-        } else if(rgba == 0xff000000) { //black, foreground
+        } else if(rgba == 0xff000000) {
             LSB_BIT_SET(mapBits, i);
             LSB_BIT_SET(maskBits, i);
-        } //otherwise 0x00000000 => alpha
+        }
     }
 
     Pixmap cp = XCreateBitmapFromData(m_display, m_window, (char*)&mapBits[0], width, height);
@@ -971,7 +989,7 @@ int X11Window::internalLoadMouseCursor(const ImagePtr& image, const Point& hotSp
     XFreePixmap(m_display, mp);
 
     m_cursors.push_back(cursor);
-    return m_cursors.size()-1;
+    return m_cursors.size() - 1;
 }
 
 void X11Window::setTitle(const std::string& title)

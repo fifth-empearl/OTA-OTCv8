@@ -953,24 +953,47 @@ int WIN32Window::internalLoadMouseCursor(const ImagePtr& image, const Point& hot
 {
     int width = image->getWidth();
     int height = image->getHeight();
-    int numbits = width * height;
-    int numbytes = (width * height)/8;
 
-    std::vector<uchar> andMask(numbytes, 0);
-    std::vector<uchar> xorMask(numbytes, 0);
+    BITMAPV5HEADER bi;
+    ZeroMemory(&bi, sizeof(bi));
+    bi.bV5Size = sizeof(bi);
+    bi.bV5Width = width;
+    bi.bV5Height = -height;
+    bi.bV5Planes = 1;
+    bi.bV5BitCount = 32;
+    bi.bV5Compression = BI_BITFIELDS;
+    bi.bV5RedMask   = 0x00FF0000;
+    bi.bV5GreenMask = 0x0000FF00;
+    bi.bV5BlueMask  = 0x000000FF;
+    bi.bV5AlphaMask = 0xFF000000;
 
-    for(int i=0;i<numbits;++i) {
-        uint32 rgba = stdext::readULE32(image->getPixelData() + i*4);
-        if(rgba == 0xffffffff) { //white
-            HSB_BIT_SET(xorMask, i);
-        } else if(rgba == 0x00000000) { //alpha
-            HSB_BIT_SET(andMask, i);
-        } // otherwise 0xff000000 => black
-    }
+    void* bits = nullptr;
+    HDC hdc = GetDC(nullptr);
+    HBITMAP color = CreateDIBSection(hdc, reinterpret_cast<BITMAPINFO*>(&bi), DIB_RGB_COLORS, &bits, nullptr, 0);
+    ReleaseDC(nullptr, hdc);
+    if (!color)
+        return -1;
+    memcpy(bits, image->getPixelData(), width * height * 4);
 
-    HCURSOR cursor = CreateCursor(m_instance, hotSpot.x, hotSpot.y, width, height, &andMask[0], &xorMask[0]);
+    std::vector<uint8_t> maskBits(((width + 31) / 32) * 4 * height, 0);
+    HBITMAP mask = CreateBitmap(width, height, 1, 1, maskBits.data());
+
+    ICONINFO ii;
+    ZeroMemory(&ii, sizeof(ii));
+    ii.fIcon = FALSE;
+    ii.xHotspot = hotSpot.x;
+    ii.yHotspot = hotSpot.y;
+    ii.hbmMask = mask;
+    ii.hbmColor = color;
+
+    HCURSOR cursor = CreateIconIndirect(&ii);
+    DeleteObject(color);
+    DeleteObject(mask);
+
+    if(!cursor)
+        return -1;
     m_cursors.push_back(cursor);
-    return m_cursors.size()-1;
+    return m_cursors.size() - 1;
 }
 
 void WIN32Window::setMouseCursor(int cursorId)
