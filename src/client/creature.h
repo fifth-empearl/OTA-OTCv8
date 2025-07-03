@@ -198,6 +198,9 @@ public:
     void setProgressBar(uint32 duration, bool ltr);
     void updateProgressBar(uint32 duration, bool ltr);
 
+    void setScale(float scale, uint16_t duration = 0);
+    float getScale() const;
+
 protected:
     virtual void updateWalkAnimation(uint8 totalPixelsWalked);
     virtual void updateWalkOffset(uint8 totalPixelsWalked, bool inNextFrame = false);
@@ -276,6 +279,13 @@ protected:
     float m_jumpDuration = 0;
     PointF m_jumpOffset;
     Timer m_jumpTimer;
+
+    struct {
+        Timer timer;
+        uint16_t duration{ 0 };
+        float start{ 1.f };
+        float target{ 1.f };
+    } m_scale;
 
     // for bot
     StaticTextPtr m_text;
