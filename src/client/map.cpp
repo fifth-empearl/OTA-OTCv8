@@ -309,6 +309,17 @@ void Map::removeCreatureLinesFor(uint32 id)
     }
 }
 
+void Map::removeCreatureLinesBetween(uint32 fromId, uint32 toId)
+{
+    for (auto it = m_creatureLines.begin(); it != m_creatureLines.end(); ) {
+        if (((*it)->getFromId() == fromId && (*it)->getToId() == toId) ||
+            ((*it)->getFromId() == toId && (*it)->getToId() == fromId))
+            it = m_creatureLines.erase(it);
+        else
+            ++it;
+    }
+}
+
 void Map::createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId)
 {
     auto it = m_creatureLineTypes.find(lineId);

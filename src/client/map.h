@@ -264,6 +264,7 @@ public:
     const std::vector<CreatureLinePtr>& getCreatureLines() { return m_creatureLines; }
     void addCreatureLine(const CreatureLinePtr& line);
     void removeCreatureLinesFor(uint32 id);
+    void removeCreatureLinesBetween(uint32 fromId, uint32 toId);
     void createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId);
     void defineCreatureLineType(uint32 lineId, const std::string& image, int r, int g, int b, int a,
                                 bool stretched, bool antialias, const std::string& shader = "");

@@ -7,3 +7,8 @@ end
 function terminate()
   g_map.clearCreatureLines()
 end
+
+-- example utility that removes all lines between two creatures
+function clearLineBetween(cidA, cidB)
+  g_map.removeCreatureLinesBetween(cidA, cidB)
+end
