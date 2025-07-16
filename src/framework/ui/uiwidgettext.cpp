@@ -22,6 +22,8 @@
 
 #include "uiwidget.h"
 #include "uitranslator.h"
+#include <memory>
+#include <framework/graphics/truetypefont.h>
 #include <framework/graphics/fontmanager.h>
 #include <framework/graphics/painter.h>
 #include <framework/core/application.h>
@@ -30,6 +32,8 @@
 void UIWidget::initText()
 {
     m_font = g_fonts.getDefaultFont();
+    if (auto tf = std::dynamic_pointer_cast<TrueTypeFont>(m_font))
+        m_fontSize = tf->getSize();
     m_textAlign = Fw::AlignCenter;
     m_textOverflowLength = 0;
     m_textOverflowCharacter = "...";
@@ -92,6 +96,8 @@ void UIWidget::parseTextStyle(const OTMLNodePtr& styleNode)
             setTextOnlyUpperCase(node->value<bool>());
         else if(node->tag() == "font")
             setFont(node->value());
+        else if(node->tag() == "font-size")
+            setFontSize(node->value<int>());
         else if (node->tag() == "shadow")
             setShadow(node->value<bool>());
         else if (node->tag() == "text-overflow") {
@@ -208,8 +214,21 @@ void UIWidget::setColoredText(const std::vector<std::string>& texts, bool dontFi
 void UIWidget::setFont(const std::string& fontName)
 {
     m_font = g_fonts.getFont(fontName);
+    if (auto tf = std::dynamic_pointer_cast<TrueTypeFont>(m_font))
+        m_fontSize = tf->getSize();
     updateText();
     onFontChange(fontName);
+}
+
+void UIWidget::setFontSize(int fontSize)
+{
+    if (auto tf = std::dynamic_pointer_cast<TrueTypeFont>(m_font)) {
+        if (tf->getSize() != fontSize) {
+            tf->loadTtf(tf->getSource(), fontSize);
+            m_fontSize = fontSize;
+            updateText();
+        }
+    }
 }
 
 void UIWidget::processCodeTags() {

@@ -24,6 +24,7 @@
 #define FONTMANAGER_H
 
 #include "bitmapfont.h"
+#include "truetypefont.h"
 
 //@bindsingleton g_fonts
 class FontManager
@@ -35,6 +36,7 @@ public:
     void clearFonts();
 
     void importFont(std::string file);
+    void importTtfFont(const std::string& file, const std::string& name, int size, bool setDefault = false);
 
     bool fontExists(const std::string& fontName);
     BitmapFontPtr getFont(const std::string& fontName);

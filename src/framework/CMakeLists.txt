@@ -378,6 +378,10 @@ if(FRAMEWORK_GRAPHICS)
     endif()
     message(STATUS "OpenGL ES: " ${OPENGLES})
 
+    find_package(Freetype REQUIRED)
+    set(framework_INCLUDE_DIRS ${framework_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+    set(framework_LIBRARIES ${framework_LIBRARIES} ${FREETYPE_LIBRARIES})
+
     if(WIN32)
         option(WINDOWS_CONSOLE "Enables console window on Windows platform" OFF)
         if(WINDOWS_CONSOLE)
@@ -399,6 +403,8 @@ if(FRAMEWORK_GRAPHICS)
         ${CMAKE_CURRENT_LIST_DIR}/graphics/atlas.h
         ${CMAKE_CURRENT_LIST_DIR}/graphics/bitmapfont.cpp
         ${CMAKE_CURRENT_LIST_DIR}/graphics/bitmapfont.h
+        ${CMAKE_CURRENT_LIST_DIR}/graphics/truetypefont.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/graphics/truetypefont.h
         ${CMAKE_CURRENT_LIST_DIR}/graphics/cachedtext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/graphics/cachedtext.h
         ${CMAKE_CURRENT_LIST_DIR}/graphics/colorarray.h

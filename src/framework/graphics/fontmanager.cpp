@@ -84,6 +84,31 @@ void FontManager::importFont(std::string file)
     }
 }
 
+void FontManager::importTtfFont(const std::string& file, const std::string& name, int size, bool setDefault)
+{
+    if (g_graphicsThreadId != std::this_thread::get_id()) {
+        g_graphicsDispatcher.addEvent(std::bind(&FontManager::importTtfFont, this, file, name, size, setDefault));
+        return;
+    }
+    try {
+        auto font = std::make_shared<TrueTypeFont>(name);
+        if (!font->loadTtf(file, size))
+            return;
+
+        for (auto it = m_fonts.begin(); it != m_fonts.end(); ++it) {
+            if ((*it)->getName() == name) {
+                m_fonts.erase(it);
+                break;
+            }
+        }
+        m_fonts.push_back(font);
+        if (!m_defaultFont || setDefault)
+            m_defaultFont = font;
+    } catch (stdext::exception& e) {
+        g_logger.error(stdext::format("Unable to load ttf font '%s': %s", file, e.what()));
+    }
+}
+
 bool FontManager::fontExists(const std::string& fontName)
 {
     for(const BitmapFontPtr& font : m_fonts) {

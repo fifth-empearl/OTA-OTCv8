@@ -565,6 +565,7 @@ protected:
     stdext::boolean<false> m_textHorizontalAutoResize;
     stdext::boolean<false> m_textOnlyUpperCase;
     BitmapFontPtr m_font;
+    int m_fontSize{0};
     std::vector<std::pair<int, Color>> m_textColors;
     std::vector<std::pair<int, Color>> m_drawTextColors;
     stdext::boolean<false> m_shadow;
@@ -589,6 +590,8 @@ public:
     void setTextVerticalAutoResize(bool textAutoResize) { m_textVerticalAutoResize = textAutoResize; updateText(); }
     void setTextOnlyUpperCase(bool textOnlyUpperCase) { m_textOnlyUpperCase = textOnlyUpperCase; setText(m_text); }
     void setFont(const std::string& fontName);
+    void setFontSize(int fontSize);
+    int getFontSize() const { return m_fontSize; }
     void setShadow(bool shadow) { m_shadow = shadow; }
     void setTextOverflowLength(uint16 length) { m_textOverflowLength = length; updateText(); }
     void setTextOverflowCharacter(std::string character) { m_textOverflowCharacter = character; updateText(); }
