@@ -143,51 +143,7 @@ function UIMiniWindow:setup()
 
   local oldParent = self:getParent()
 
-
-  local settings = {}
-  if g_settings.getNodeSize('MiniWindows') < 50 then
-    settings = g_settings.getNode('MiniWindows')
-  end
-
-  if settings then
-    local selfSettings = settings[self:getId()]
-    if selfSettings then
-      if selfSettings.parentId then
-        local parent = rootWidget:recursiveGetChildById(selfSettings.parentId)
-        if parent then
-          if parent:getClassName() == 'UIMiniWindowContainer' and selfSettings.index and parent:isOn() then
-            self:setParent(parent, true)
-            self.miniIndex = selfSettings.index
-            parent:scheduleInsert(self, selfSettings.index)
-          elseif selfSettings.position then
-            self:setParent(parent, true)
-            self:setPosition(topoint(selfSettings.position))
-          end
-        end
-      end
-
-      if selfSettings.minimized then
-        self:minimize(true)
-      else
-        if selfSettings.height and self:isResizeable() then
-          self:setHeight(selfSettings.height)
-        elseif selfSettings.height and not self:isResizeable() then
-          self:eraseSettings({height = true})
-        end
-      end
-      if selfSettings.closed and not self.forceOpen and not self.containerWindow then
-        self:close(true)
-      end
-
-      if selfSettings.locked then
-        self:lock(true)
-      end
-    else 
-      if not self.forceOpen and self.autoOpen ~= nil and (self.autoOpen == 0 or self.autoOpen == false) and not self.containerWindow then
-        self:close(true)
-      end
-    end
-  end
+  self:updateFromSettings()
 
   local newParent = self:getParent()
 
@@ -203,6 +159,71 @@ function UIMiniWindow:setup()
   end
 
   self:fitOnParent()
+
+  if not self._onlineUpdater then
+    self._onlineUpdater = function() self:updateFromSettings() end
+    connect(g_game, { onGameStart = self._onlineUpdater })
+  end
+end
+
+function UIMiniWindow:updateFromSettings()
+  local settings = g_settings.getNode('MiniWindows') or {}
+  local char = g_game.getCharacterName()
+  if char == '' then char = nil end
+  local charSettings
+  if char and settings[char] then
+    charSettings = settings[char]
+  elseif char then
+    charSettings = {}
+    settings[char] = charSettings
+  else
+    charSettings = settings
+  end
+
+  local selfSettings = charSettings and charSettings[self:getId()]
+  if selfSettings then
+    if selfSettings.parentId then
+      local parent = rootWidget:recursiveGetChildById(selfSettings.parentId)
+      if parent then
+        if parent:getClassName() == 'UIMiniWindowContainer' and selfSettings.index and parent:isOn() then
+          self:setParent(parent, true)
+          self.miniIndex = selfSettings.index
+          parent:scheduleInsert(self, selfSettings.index)
+        elseif selfSettings.position then
+          self:setParent(parent, true)
+          self:setPosition(topoint(selfSettings.position))
+        end
+      end
+    end
+
+    if selfSettings.minimized then
+      self:minimize(true)
+    else
+      if selfSettings.height and self:isResizeable() then
+        self:setHeight(selfSettings.height)
+      elseif selfSettings.height and not self:isResizeable() then
+        self:eraseSettings({height = true})
+      end
+    end
+    if selfSettings.closed and not self.forceOpen and not self.containerWindow then
+      self:close(true)
+    end
+
+    if selfSettings.locked then
+      self:lock(true)
+    end
+  else
+    if not self.forceOpen and self.autoOpen ~= nil and (self.autoOpen == 0 or self.autoOpen == false) and not self.containerWindow then
+      self:close(true)
+    end
+  end
+end
+
+function UIMiniWindow:onDestroy()
+  if self._onlineUpdater then
+    disconnect(g_game, { onGameStart = self._onlineUpdater })
+    self._onlineUpdater = nil
+  end
 end
 
 function UIMiniWindow:onVisibilityChange(visible)
@@ -309,12 +330,15 @@ end
 
 function UIMiniWindow:getSettings(name)
   if not self.save then return nil end
-  local settings = g_settings.getNode('MiniWindows')
-  if settings then
-    local selfSettings = settings[self:getId()]
-    if selfSettings then
-      return selfSettings[name]
-    end
+  local settings = g_settings.getNode('MiniWindows') or {}
+  local char = g_game.isOnline() and g_game.getCharacterName()
+  if char == '' then char = nil end
+  if char and settings[char] then
+    settings = settings[char]
+  end
+  local selfSettings = settings[self:getId()]
+  if selfSettings then
+    return selfSettings[name]
   end
   return nil
 end
@@ -322,55 +346,78 @@ end
 function UIMiniWindow:setSettings(data)
   if not self.save then return end
 
-  local settings = g_settings.getNode('MiniWindows')
-  if not settings then
-    settings = {}
+  local settings = g_settings.getNode('MiniWindows') or {}
+  local char = g_game.isOnline() and g_game.getCharacterName()
+  if char == '' then char = nil end
+  if char then
+    settings[char] = settings[char] or {}
+    settings = settings[char]
   end
 
   local id = self:getId()
-  if not settings[id] then
-    settings[id] = {}
-  end
+  settings[id] = settings[id] or {}
 
   for key,value in pairs(data) do
     settings[id][key] = value
   end
 
-  g_settings.setNode('MiniWindows', settings)
+  if char then
+    local all = g_settings.getNode('MiniWindows') or {}
+    all[char] = settings
+    g_settings.setNode('MiniWindows', all)
+  else
+    g_settings.setNode('MiniWindows', settings)
+  end
 end
 
 function UIMiniWindow:eraseSettings(data)
   if not self.save then return end
 
-  local settings = g_settings.getNode('MiniWindows')
-  if not settings then
-    settings = {}
+  local settings = g_settings.getNode('MiniWindows') or {}
+  local char = g_game.isOnline() and g_game.getCharacterName()
+  if char == '' then char = nil end
+  if char then
+    settings[char] = settings[char] or {}
+    settings = settings[char]
   end
 
   local id = self:getId()
-  if not settings[id] then
-    settings[id] = {}
-  end
+  settings[id] = settings[id] or {}
 
   for key,value in pairs(data) do
     settings[id][key] = nil
   end
 
-  g_settings.setNode('MiniWindows', settings)
+  if char then
+    local all = g_settings.getNode('MiniWindows') or {}
+    all[char] = settings
+    g_settings.setNode('MiniWindows', all)
+  else
+    g_settings.setNode('MiniWindows', settings)
+  end
 end
 
 function UIMiniWindow:clearSettings()
   if not self.save then return end
 
-  local settings = g_settings.getNode('MiniWindows')
-  if not settings then
-    settings = {}
+  local settings = g_settings.getNode('MiniWindows') or {}
+  local char = g_game.isOnline() and g_game.getCharacterName()
+  if char == '' then char = nil end
+  if char then
+    settings[char] = settings[char] or {}
+    settings = settings[char]
   end
 
   local id = self:getId()
   settings[id] = {}
 
-  g_settings.setNode('MiniWindows', settings)
+  if char then
+    local all = g_settings.getNode('MiniWindows') or {}
+    all[char] = settings
+    g_settings.setNode('MiniWindows', all)
+  else
+    g_settings.setNode('MiniWindows', settings)
+  end
 end
 
 function UIMiniWindow:saveParent(parent)

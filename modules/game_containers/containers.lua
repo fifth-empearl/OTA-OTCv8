@@ -209,7 +209,7 @@ function onContainerOpen(container, previousContainer)
     end
   end
 
-  if not previousContainer then
+  if not previousContainer and not containerWindow:getSettings('height') then
     local filledLines = math.max(math.ceil(container:getItemsCount() / layout:getNumColumns()), 1)
     containerWindow:setContentHeight(filledLines*cellSize.height)
   end
