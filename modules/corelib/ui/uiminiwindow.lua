@@ -5,6 +5,7 @@ function UIMiniWindow.create()
   local miniwindow = UIMiniWindow.internalCreate()
   miniwindow.UIMiniWindowContainer = true
   miniwindow._charName = nil
+  miniwindow.maximizedHeight = miniwindow:getHeight()
   return miniwindow
 end
 
@@ -38,11 +39,13 @@ function UIMiniWindow:minimize(dontSave)
   if self.minimizeButton then
     self.minimizeButton:setOn(true)
   end
-  self.maximizedHeight = self:getHeight()
+  if not dontSave then
+    self.maximizedHeight = self:getHeight()
+  end
   self:setHeight(self.minimizedHeight)
 
   if not dontSave then
-    self:setSettings({minimized = true})
+    self:setSettings({minimized = true, height = self.maximizedHeight})
   end
 
   signalcall(self.onMinimize, self)
@@ -59,7 +62,7 @@ function UIMiniWindow:maximize(dontSave)
   self:setHeight(self:getSettings('height') or self.maximizedHeight)
 
   if not dontSave then
-    self:setSettings({minimized = false})
+    self:setSettings({minimized = false, height = self:getHeight()})
   end
 
   local parent = self:getParent()
@@ -205,6 +208,9 @@ function UIMiniWindow:updateFromSettings()
     end
 
     if selfSettings.minimized then
+      if not self.maximizedHeight or self.maximizedHeight == self.minimizedHeight then
+        self.maximizedHeight = selfSettings.height or self:getHeight()
+      end
       self:minimize(true)
     else
       if selfSettings.height and self:isResizeable() then
