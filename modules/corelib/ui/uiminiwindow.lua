@@ -4,6 +4,7 @@ UIMiniWindow = extends(UIWindow, "UIMiniWindow")
 function UIMiniWindow.create()
   local miniwindow = UIMiniWindow.internalCreate()
   miniwindow.UIMiniWindowContainer = true
+  miniwindow._charName = nil
   return miniwindow
 end
 
@@ -170,18 +171,25 @@ function UIMiniWindow:updateFromSettings()
   local settings = g_settings.getNode('MiniWindows') or {}
   local char = g_game.getCharacterName()
   if char == '' then char = nil end
+  if char then
+    self._charName = char
+  end
+  local charKey = self._charName
   local charSettings
-  if char and settings[char] then
-    charSettings = settings[char]
-  elseif char then
+  if charKey and settings[charKey] then
+    charSettings = settings[charKey]
+  elseif charKey then
     charSettings = {}
-    settings[char] = charSettings
+    settings[charKey] = charSettings
   else
     charSettings = settings
   end
 
   local selfSettings = charSettings and charSettings[self:getId()]
   if selfSettings then
+    if selfSettings.height then
+      self.maximizedHeight = selfSettings.height
+    end
     if selfSettings.parentId then
       local parent = rootWidget:recursiveGetChildById(selfSettings.parentId)
       if parent then
@@ -204,6 +212,7 @@ function UIMiniWindow:updateFromSettings()
       elseif selfSettings.height and not self:isResizeable() then
         self:eraseSettings({height = true})
       end
+      self.maximizedHeight = self:getHeight()
     end
     if selfSettings.closed and not self.forceOpen and not self.containerWindow then
       self:close(true)
@@ -216,6 +225,7 @@ function UIMiniWindow:updateFromSettings()
     if not self.forceOpen and self.autoOpen ~= nil and (self.autoOpen == 0 or self.autoOpen == false) and not self.containerWindow then
       self:close(true)
     end
+    self.maximizedHeight = self:getHeight()
   end
 end
 
@@ -331,7 +341,7 @@ end
 function UIMiniWindow:getSettings(name)
   if not self.save then return nil end
   local settings = g_settings.getNode('MiniWindows') or {}
-  local char = g_game.isOnline() and g_game.getCharacterName()
+  local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
   if char and settings[char] then
     settings = settings[char]
@@ -347,7 +357,7 @@ function UIMiniWindow:setSettings(data)
   if not self.save then return end
 
   local settings = g_settings.getNode('MiniWindows') or {}
-  local char = g_game.isOnline() and g_game.getCharacterName()
+  local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
   if char then
     settings[char] = settings[char] or {}
@@ -374,7 +384,7 @@ function UIMiniWindow:eraseSettings(data)
   if not self.save then return end
 
   local settings = g_settings.getNode('MiniWindows') or {}
-  local char = g_game.isOnline() and g_game.getCharacterName()
+  local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
   if char then
     settings[char] = settings[char] or {}
@@ -401,7 +411,7 @@ function UIMiniWindow:clearSettings()
   if not self.save then return end
 
   local settings = g_settings.getNode('MiniWindows') or {}
-  local char = g_game.isOnline() and g_game.getCharacterName()
+  local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
   if char then
     settings[char] = settings[char] or {}
