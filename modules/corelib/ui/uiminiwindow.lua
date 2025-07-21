@@ -171,12 +171,11 @@ function UIMiniWindow:setup()
 end
 
 function UIMiniWindow:updateFromSettings()
-  local settings = g_settings.getNode('MiniWindows') or {}
   local char = g_game.getCharacterName()
   if char == '' then char = nil end
-  if char then
-    self._charName = char
-  end
+  if not char then return end
+  self._charName = char
+  local settings = g_settings.getNode('MiniWindows') or {}
   local charKey = self._charName
   local charSettings
   if charKey and settings[charKey] then
@@ -230,6 +229,12 @@ function UIMiniWindow:updateFromSettings()
   else
     if not self.forceOpen and self.autoOpen ~= nil and (self.autoOpen == 0 or self.autoOpen == false) and not self.containerWindow then
       self:close(true)
+    end
+    if self:isOn() then
+      self:maximize(true)
+    end
+    if not self:isDraggable() then
+      self:unlock(true)
     end
     self.maximizedHeight = self:getHeight()
   end
@@ -346,11 +351,14 @@ end
 
 function UIMiniWindow:getSettings(name)
   if not self.save then return nil end
-  local settings = g_settings.getNode('MiniWindows') or {}
   local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
-  if char and settings[char] then
+  if not char then return nil end
+  local settings = g_settings.getNode('MiniWindows') or {}
+  if settings[char] then
     settings = settings[char]
+  else
+    return nil
   end
   local selfSettings = settings[self:getId()]
   if selfSettings then
@@ -361,14 +369,13 @@ end
 
 function UIMiniWindow:setSettings(data)
   if not self.save then return end
-
-  local settings = g_settings.getNode('MiniWindows') or {}
   local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
-  if char then
-    settings[char] = settings[char] or {}
-    settings = settings[char]
-  end
+  if not char then return end
+
+  local settings = g_settings.getNode('MiniWindows') or {}
+  settings[char] = settings[char] or {}
+  settings = settings[char]
 
   local id = self:getId()
   settings[id] = settings[id] or {}
@@ -377,25 +384,20 @@ function UIMiniWindow:setSettings(data)
     settings[id][key] = value
   end
 
-  if char then
-    local all = g_settings.getNode('MiniWindows') or {}
-    all[char] = settings
-    g_settings.setNode('MiniWindows', all)
-  else
-    g_settings.setNode('MiniWindows', settings)
-  end
+  local all = g_settings.getNode('MiniWindows') or {}
+  all[char] = settings
+  g_settings.setNode('MiniWindows', all)
 end
 
 function UIMiniWindow:eraseSettings(data)
   if not self.save then return end
-
-  local settings = g_settings.getNode('MiniWindows') or {}
   local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
-  if char then
-    settings[char] = settings[char] or {}
-    settings = settings[char]
-  end
+  if not char then return end
+
+  local settings = g_settings.getNode('MiniWindows') or {}
+  settings[char] = settings[char] or {}
+  settings = settings[char]
 
   local id = self:getId()
   settings[id] = settings[id] or {}
@@ -404,36 +406,27 @@ function UIMiniWindow:eraseSettings(data)
     settings[id][key] = nil
   end
 
-  if char then
-    local all = g_settings.getNode('MiniWindows') or {}
-    all[char] = settings
-    g_settings.setNode('MiniWindows', all)
-  else
-    g_settings.setNode('MiniWindows', settings)
-  end
+  local all = g_settings.getNode('MiniWindows') or {}
+  all[char] = settings
+  g_settings.setNode('MiniWindows', all)
 end
 
 function UIMiniWindow:clearSettings()
   if not self.save then return end
-
-  local settings = g_settings.getNode('MiniWindows') or {}
   local char = self._charName or (g_game.isOnline() and g_game.getCharacterName())
   if char == '' then char = nil end
-  if char then
-    settings[char] = settings[char] or {}
-    settings = settings[char]
-  end
+  if not char then return end
+
+  local settings = g_settings.getNode('MiniWindows') or {}
+  settings[char] = settings[char] or {}
+  settings = settings[char]
 
   local id = self:getId()
   settings[id] = {}
 
-  if char then
-    local all = g_settings.getNode('MiniWindows') or {}
-    all[char] = settings
-    g_settings.setNode('MiniWindows', all)
-  else
-    g_settings.setNode('MiniWindows', settings)
-  end
+  local all = g_settings.getNode('MiniWindows') or {}
+  all[char] = settings
+  g_settings.setNode('MiniWindows', all)
 end
 
 function UIMiniWindow:saveParent(parent)
