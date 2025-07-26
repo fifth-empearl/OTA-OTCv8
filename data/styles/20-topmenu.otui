@@ -31,6 +31,18 @@ TopMenu < UIWindow
       type: horizontalBox
       spacing: 4
 
+TopCategoryMenu < Panel
+  width: 50
+  image-source: /images/ui/menubox
+  image-border: 3
+  padding: 3
+  phantom: true
+  layout:
+    type: verticalBox
+    spacing: 2
+
+TopCategoryMenuIconButton < PopupMenuButton
+
   Label
     id: fpsLabel
     text-auto-resize: true

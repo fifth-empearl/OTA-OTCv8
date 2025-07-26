@@ -8,6 +8,8 @@ local categories = {
 	{name = "Others", icon = "/images/topbuttons/options", tooltip = "Others", index = 4}
 }
 local categoryMap = {}
+local currentMenu = nil
+local hideCategoryMenu
 
 
 -- private functions
@@ -40,70 +42,84 @@ local function createButton(id, description, icon, callback, index)
 	return button
 end
 
+local function ensureCategoryMenu(category)
+       if category.menu and not category.menu:isDestroyed() then
+               return category.menu
+       end
+
+       local menu = g_ui.createWidget("TopCategoryMenu", topMenu)
+       menu:hide()
+
+       menu.onHoverChange = function(widget, hovered)
+               if not hovered then
+                       local thisMenu = menu
+                       scheduleEvent(function()
+                               if currentMenu == thisMenu and not category.button:isHovered() then
+                                       local mousePos = g_window.getMousePosition()
+                                       if not thisMenu:containsPoint(mousePos) then
+                                               hideCategoryMenu(category.name)
+                                       end
+                               end
+                       end, 100)
+               end
+       end
+
+       category.menu = menu
+       return menu
+end
+
 local function showCategoryMenu(name)
-	local category = categoryMap[name]
-	if not category then
-		return
-	end
+       local category = categoryMap[name]
+       if not category then
+               return
+       end
 
-	if category.menu then
-		category.menu:destroy()
-	end
+       local menu = ensureCategoryMenu(category)
 
-	local menu = g_ui.createWidget("PopupMenu")
-	menu:setGameMenu(true)
+       table.sort(
+               category.items,
+               function(a, b)
+                       return (a.index or 9999) < (b.index or 9999)
+               end
+       )
 
-	table.sort(
-		category.items,
-		function(a, b)
-			return (a.index or 9999) < (b.index or 9999)
-		end
-	)
+       if menu.itemCount ~= #category.items then
+               menu:destroyChildren()
+               for _, item in ipairs(category.items) do
+                       local option = g_ui.createWidget(menu:getStyleName() .. "IconButton", menu)
+                       option.onClick = function()
+                               hideCategoryMenu(name)
+                               item.callback(menu:getPosition())
+                       end
+                       option:setText(item.description)
+                       option:setTooltip(item.description)
+                       option:setIcon(resolvepath(item.icon or "", 3))
+                       local width = option:getTextSize().width + option:getMarginLeft() + option:getMarginRight() + 40
+                       menu:setWidth(math.max(menu:getWidth(), width))
+               end
+               menu.itemCount = #category.items
+       end
 
-	for _, item in ipairs(category.items) do
-		local option = g_ui.createWidget(menu:getStyleName() .. "IconButton", menu)
-		option.onClick = function()
-			menu:destroy()
-			item.callback(menu:getPosition())
-		end
-		option:setText(item.description)
-		option:setTooltip(item.description)
-		option:setIcon(resolvepath(item.icon or "", 3))
-		local width = option:getTextSize().width + option:getMarginLeft() + option:getMarginRight() + 40
-		menu:setWidth(math.max(menu:getWidth(), width))
-	end
+       if currentMenu and currentMenu ~= menu then
+               currentMenu:hide()
+       end
 
-	local pos = category.button:getPosition()
-	pos.y = pos.y + category.button:getHeight()
-	menu:display(pos)
+       local pos = category.button:getPosition()
+       pos.y = pos.y + category.button:getHeight()
+       menu:setPosition(pos)
+       menu:show()
 
-	menu.onHoverChange = function(widget, hovered)
-		if not hovered then
-			scheduleEvent(
-				function()
-					if category.menu and not category.button:isHovered() then
-						local mousePos = g_window.getMousePosition()
-						if not category.menu:containsPoint(mousePos) then
-							category.menu:destroy()
-						end
-					end
-				end,
-			100)
-		end
-	end
-
-	menu.onDestroy = function()
-		category.menu = nil
-	end
-
-	category.menu = menu
+       currentMenu = menu
 end
 
 local function hideCategoryMenu(name)
-	local category = categoryMap[name]
-	if category and category.menu then
-		category.menu:destroy()
-	end
+       local category = categoryMap[name]
+       if category and category.menu and category.menu:isVisible() then
+               category.menu:hide()
+               if currentMenu == category.menu then
+                       currentMenu = nil
+               end
+       end
 end
 
 function createCategory(name, icon, tooltip, index)
@@ -121,23 +137,24 @@ function createCategory(name, icon, tooltip, index)
 		index
 	)
 	catButton:setTooltip(tooltip or name)
-	categoryMap[name] = {button = catButton, items = {}, index = index}
-	catButton.onHoverChange = function(widget, hovered)
-		if hovered then
-			showCategoryMenu(name)
-		else
-			scheduleEvent(function()
-				local cat = categoryMap[name]
-				if cat and not cat.button:isHovered() then
-					local mousePos = g_window.getMousePosition()
-					if not cat.menu or not cat.menu:containsPoint(mousePos) then
-						hideCategoryMenu(name)
-					end
-				end
-			end, 100)
-		end
-	end
-	return catButton
+       categoryMap[name] = {button = catButton, items = {}, index = index, name = name}
+       catButton.onHoverChange = function(widget, hovered)
+               if hovered then
+                       showCategoryMenu(name)
+               else
+                       local lastMenu = categoryMap[name] and categoryMap[name].menu
+                       scheduleEvent(function()
+                               local cat = categoryMap[name]
+                               if cat and cat.menu == lastMenu and not cat.button:isHovered() then
+                                       local mousePos = g_window.getMousePosition()
+                                       if not cat.menu or not cat.menu:isVisible() or not cat.menu:containsPoint(mousePos) then
+                                               hideCategoryMenu(name)
+                                       end
+                               end
+                       end, 100)
+               end
+       end
+        return catButton
 end
 
 -- public functions
@@ -198,9 +215,15 @@ function terminate()
 	)
 	removeEvent(fpsUpdateEvent)
 
-	Keybind.delete("UI", "Toggle Top Menu")
+       Keybind.delete("UI", "Toggle Top Menu")
 
-	topMenu:destroy()
+       for _, cat in pairs(categoryMap) do
+               if cat.menu then
+                       cat.menu:destroy()
+               end
+       end
+
+       topMenu:destroy()
 end
 
 function online()
