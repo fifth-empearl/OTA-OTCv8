@@ -43,7 +43,7 @@ local function showCategoryMenu(name)
                 return
         end
 
-        if category.menu then
+        if category.menu and not category.menu:isDestroyed() then
                 category.menu:destroy()
         end
 
@@ -57,10 +57,13 @@ local function showCategoryMenu(name)
         for _, item in ipairs(category.items) do
                 local option = g_ui.createWidget(menu:getStyleName() .. 'IconButton', menu)
                 option.onClick = function()
-                        menu:destroy()
+                        if not menu:isDestroyed() then
+                                menu:destroy()
+                        end
                         item.callback(menu:getPosition())
                 end
                 option:setText(item.description)
+                option:setTooltip(item.description)
                 option:setIcon(resolvepath(item.icon or '', 3))
                 local width = option:getTextSize().width + option:getMarginLeft() + option:getMarginRight() + 25
                 menu:setWidth(math.max(menu:getWidth(), width))
@@ -73,7 +76,7 @@ local function showCategoryMenu(name)
         menu.onHoverChange = function(widget, hovered)
                 if not hovered then
                         scheduleEvent(function()
-                                if category.menu and not category.button:isHovered() and not category.menu:isHovered() then
+                                if category.menu and not category.menu:isDestroyed() and not category.button:isHovered() and not category.menu:isHovered() then
                                         category.menu:destroy()
                                 end
                         end, 50)
@@ -89,7 +92,7 @@ end
 
 local function hideCategoryMenu(name)
         local category = categoryMap[name]
-        if category and category.menu then
+        if category and category.menu and not category.menu:isDestroyed() then
                 category.menu:destroy()
         end
 end
@@ -100,6 +103,7 @@ function createCategory(name, icon, tooltip, index)
         end
 
         local catButton = createButton('cat_' .. name, tooltip or name, icon or '', function() end, false, index)
+        catButton:setTooltip(tooltip or name)
         categoryMap[name] = {button = catButton, items = {}, index = index}
         catButton.onHoverChange = function(widget, hovered)
                 if hovered then
