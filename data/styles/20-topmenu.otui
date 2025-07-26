@@ -12,7 +12,6 @@ TopMenuButtonsPanel < Panel
   layout:
     type: horizontalBox
     spacing: 4
-    fit-children: true
   padding: 6 4
 
 
