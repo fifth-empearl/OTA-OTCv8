@@ -55,12 +55,30 @@ local function showCategoryMenu(name)
         end)
 
         for _, item in ipairs(category.items) do
-                menu:addOption(item.description, item.callback)
+                local option = g_ui.createWidget(menu:getStyleName() .. 'IconButton', menu)
+                option.onClick = function()
+                        menu:destroy()
+                        item.callback(menu:getPosition())
+                end
+                option:setText(item.description)
+                option:setIcon(resolvepath(item.icon or '', 3))
+                local width = option:getTextSize().width + option:getMarginLeft() + option:getMarginRight() + 25
+                menu:setWidth(math.max(menu:getWidth(), width))
         end
 
         local pos = category.button:getPosition()
         pos.y = pos.y + category.button:getHeight()
         menu:display(pos)
+
+        menu.onHoverChange = function(widget, hovered)
+                if not hovered then
+                        scheduleEvent(function()
+                                if category.menu and not category.button:isHovered() and not category.menu:isHovered() then
+                                        category.menu:destroy()
+                                end
+                        end, 50)
+                end
+        end
 
         menu.onDestroy = function()
                 category.menu = nil
@@ -87,7 +105,12 @@ function createCategory(name, icon, tooltip, index)
                 if hovered then
                         showCategoryMenu(name)
                 else
-                        hideCategoryMenu(name)
+                        scheduleEvent(function()
+                                local cat = categoryMap[name]
+                                if cat and not cat.button:isHovered() and (not cat.menu or not cat.menu:isHovered()) then
+                                        hideCategoryMenu(name)
+                                end
+                        end, 50)
                 end
         end
         return catButton
@@ -242,7 +265,13 @@ function addCategoryListing(id, description, icon, callback, category, index)
         end
 
         local cat = categoryMap[category]
-        table.insert(cat.items, {id = id, description = description, callback = callback, index = index})
+        table.insert(cat.items, {
+                id = id,
+                description = description,
+                icon = icon,
+                callback = callback,
+                index = index
+        })
         return cat.button
 end
 

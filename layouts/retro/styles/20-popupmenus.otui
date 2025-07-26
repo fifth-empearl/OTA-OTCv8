@@ -16,6 +16,11 @@ PopupMenuButton < UIButton
   $disabled:
     color: #777777
 
+PopupMenuIconButton < PopupMenuButton
+  icon-align: left
+  icon-offset-x: 4
+  icon-size: 16 16
+
 PopupMenuShortcutLabel < Label
   font: verdana-11px-rounded
   text-align: right
