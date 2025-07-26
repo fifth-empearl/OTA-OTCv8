@@ -1,19 +1,8 @@
 TopButton < Button
   size: 26 26
   icon-rect: 0 0 22 22
+  focusable: false
 
-TopToggleButton < Button
-  size: 26 26
-  icon-rect: 0 0 22 22
-
-
-
-TopMenuButtonsPanel < Panel
-  layout:
-    type: horizontalBox
-    spacing: 4
-    fit-children: true
-  padding: 6 4
 
 
 
@@ -27,9 +16,9 @@ TopMenu < UIWindow
   background-color: #1A1A1A80
   focusable: false
   draggable: true
-  phantom: false
+  phantom: true
 
-  UIWidget
+  Panel
     id: buttonsPanel
     anchors.fill: parent
     margin: 20
@@ -37,6 +26,10 @@ TopMenu < UIWindow
     border-color: #A68D73
     background-color: #1A1A1A80
     phantom: true
+    focusable: false
+    layout:
+      type: horizontalBox
+      spacing: 4
 
   Label
     id: fpsLabel
