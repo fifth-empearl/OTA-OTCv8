@@ -2,17 +2,76 @@
 local topMenu
 local fpsUpdateEvent = nil
 
-
 -- list of predefined categories
 local categories = {
-	{name = "Others", icon = "/images/topbuttons/options", tooltip = "Others", index = 4}
+	{name = "Player", icon = "/images/topbuttons/inventory", tooltip = "Player", index = 4},
+	{name = "Others", icon = "/images/topbuttons/options", tooltip = "Others", index = 5},
 }
 local categoryMap = {}
+local currentMenu = nil
+local settingsKey = "TopMenu"
 
+local function updateCurrentMenuPosition()
+	if currentMenu and currentMenu:isVisible() then
+		local category = currentMenu.category
+		if category and category.button then
+			local pos = category.button:getPosition()
+			pos.y = pos.y + category.button:getHeight() + 1
+			currentMenu:setPosition(pos)
+		end
+	end
+end
+
+local function updateTopMenuWidth()
+	if not topMenu or not topMenu.buttonsPanel then
+		return
+	end
+
+	local spacing = 0
+	local layout = topMenu.buttonsPanel:getLayout()
+	if layout and layout.getSpacing then
+		spacing = layout:getSpacing()
+	end
+
+	local panelWidth = -spacing
+	for _, child in ipairs(topMenu.buttonsPanel:getChildren()) do
+		if child:isExplicitlyVisible() then
+			panelWidth = panelWidth + child:getWidth() + spacing
+		end
+	end
+
+	panelWidth = math.max(0, panelWidth)
+	panelWidth =
+		panelWidth + topMenu.buttonsPanel:getPaddingLeft() + topMenu.buttonsPanel:getPaddingRight() +
+		topMenu.buttonsPanel:getMarginLeft() +
+		topMenu.buttonsPanel:getMarginRight() +
+		topMenu.buttonsPanel:getBorderLeftWidth() +
+		topMenu.buttonsPanel:getBorderRightWidth()
+
+	topMenu:setWidth(panelWidth)
+	updateCurrentMenuPosition()
+end
+
+local function savePosition()
+	if topMenu then
+		local settings = {}
+		settings.position = pointtostring(topMenu:getPosition())
+		g_settings.mergeNode(settingsKey, settings)
+	end
+end
+
+local function loadPosition()
+	local settings = g_settings.getNode(settingsKey)
+	if settings and settings.position then
+		topMenu:breakAnchors()
+		topMenu:setPosition(topoint(settings.position))
+	end
+end
 
 -- private functions
-local function createButton(id, description, icon, callback, index)
-	local class = "TopButton"
+local function createButton(id, description, icon, callback, index, hasMenu)
+	hasMenu = hasMenu or false
+	local class = hasMenu and "TopButton2" or "TopButton"
 	local button = g_ui.createWidget(class, topMenu.buttonsPanel)
 	button:setId(id)
 	button:setTooltip(description)
@@ -37,7 +96,50 @@ local function createButton(id, description, icon, callback, index)
 	for i, child in ipairs(children) do
 		topMenu.buttonsPanel:moveChildToIndex(child, i)
 	end
+	updateTopMenuWidth()
 	return button
+end
+
+local function hideCategoryMenu(name)
+	local category = categoryMap[name]
+	if category and category.menu and category.menu:isVisible() then
+		category.menu:hide()
+		category.button:setChecked(false)
+		if currentMenu == category.menu then
+			currentMenu = nil
+		end
+	end
+end
+
+local function ensureCategoryMenu(category)
+	if category.menu and not category.menu:isDestroyed() then
+		category.menu.category = category
+		return category.menu
+	end
+
+	local menu = g_ui.createWidget("TopCategoryMenu", g_ui.getRootWidget())
+	menu:hide()
+	menu.category = category
+
+	menu.onHoverChange = function(widget, hovered)
+		if not hovered then
+			local thisMenu = menu
+			scheduleEvent(
+				function()
+					if currentMenu == thisMenu and not category.button:isHovered() then
+						local mousePos = g_window.getMousePosition()
+						if not thisMenu:containsPoint(mousePos) then
+							hideCategoryMenu(category.name)
+						end
+					end
+				end,
+				100
+			)
+		end
+	end
+
+	category.menu = menu
+	return menu
 end
 
 local function showCategoryMenu(name)
@@ -46,12 +148,7 @@ local function showCategoryMenu(name)
 		return
 	end
 
-	if category.menu then
-		category.menu:destroy()
-	end
-
-	local menu = g_ui.createWidget("PopupMenu")
-	menu:setGameMenu(true)
+	local menu = ensureCategoryMenu(category)
 
 	table.sort(
 		category.items,
@@ -60,53 +157,77 @@ local function showCategoryMenu(name)
 		end
 	)
 
-	for _, item in ipairs(category.items) do
-		local option = g_ui.createWidget(menu:getStyleName() .. "IconButton", menu)
-		option.onClick = function()
-			menu:destroy()
-			item.callback(menu:getPosition())
+	if menu.itemCount ~= #category.items then
+		menu:destroyChildren()
+		local label = g_ui.createWidget("TopCategoryMenuLabel", menu)
+		label:setText(name)
+		label.onHoverChange = function(_, hovered)
+			if hovered then
+				return
+			end
+			scheduleEvent(
+			function()
+				if currentMenu ~= menu then
+					return
+				end
+
+				local mousePos = g_window.getMousePosition()
+				if not menu:containsPoint(mousePos) and not category.button:isHovered() then
+					hideCategoryMenu(name)
+				end
+			end,
+			100)
 		end
-		option:setText(item.description)
-		option:setTooltip(item.description)
-		option:setIcon(resolvepath(item.icon or "", 3))
-		local width = option:getTextSize().width + option:getMarginLeft() + option:getMarginRight() + 40
-		menu:setWidth(math.max(menu:getWidth(), width))
+		for _, item in ipairs(category.items) do
+			local option = g_ui.createWidget(menu:getStyleName() .. "IconButton", menu)
+			option.onClick = function()
+				hideCategoryMenu(name)
+				item.callback(menu:getPosition())
+			end
+			option.onHoverChange = function(_, hovered)
+				if hovered then
+					return
+				end
+				local thisMenu = menu
+				scheduleEvent(
+				function()
+					if currentMenu ~= thisMenu then
+						return
+					end
+
+					local mousePos = g_window.getMousePosition()
+					if not thisMenu:containsPoint(mousePos) and not category.button:isHovered() then
+						hideCategoryMenu(name)
+					end
+				end,
+				100)
+			end
+			option:setText(item.description)
+			option:setTooltip(item.description)
+			option:setIcon(resolvepath(item.icon or "", 3))
+			local width = option:getTextSize().width + option:getMarginLeft() + option:getMarginRight() + 40
+			menu:setWidth(math.max(menu:getWidth(), width))
+		end
+		menu.itemCount = #category.items
+	end
+
+	if currentMenu and currentMenu ~= menu then
+		currentMenu:hide()
+		currentMenu.button:setChecked(false)
 	end
 
 	local pos = category.button:getPosition()
-	pos.y = pos.y + category.button:getHeight()
-	menu:display(pos)
+	pos.y = pos.y + category.button:getHeight() + 1
+	menu:setPosition(pos)
+	menu:show()
+	category.button:setChecked(true)
 
-	menu.onHoverChange = function(widget, hovered)
-		if not hovered then
-			scheduleEvent(
-				function()
-					if category.menu and not category.button:isHovered() then
-						local mousePos = g_window.getMousePosition()
-						if not category.menu:containsPoint(mousePos) then
-							category.menu:destroy()
-						end
-					end
-				end,
-			100)
-		end
-	end
-
-	menu.onDestroy = function()
-		category.menu = nil
-	end
-
-	category.menu = menu
+	updateCurrentMenuPosition()
+	currentMenu = menu
+	currentMenu.button = category.button
 end
 
-local function hideCategoryMenu(name)
-	local category = categoryMap[name]
-	if category and category.menu then
-		category.menu:destroy()
-	end
-end
-
-function createCategory(name, icon, tooltip, index)
+function createCategory(name, icon, tooltip, index, hasMenu)
 	if categoryMap[name] then
 		return categoryMap[name].button
 	end
@@ -118,23 +239,27 @@ function createCategory(name, icon, tooltip, index)
 		icon or "",
 		function()
 		end,
-		index
+		index,
+		hasMenu
 	)
 	catButton:setTooltip(tooltip or name)
-	categoryMap[name] = {button = catButton, items = {}, index = index}
+	categoryMap[name] = {button = catButton, items = {}, index = index, name = name}
 	catButton.onHoverChange = function(widget, hovered)
 		if hovered then
 			showCategoryMenu(name)
 		else
-			scheduleEvent(function()
-				local cat = categoryMap[name]
-				if cat and not cat.button:isHovered() then
-					local mousePos = g_window.getMousePosition()
-					if not cat.menu or not cat.menu:containsPoint(mousePos) then
-						hideCategoryMenu(name)
+			local lastMenu = categoryMap[name] and categoryMap[name].menu
+			scheduleEvent(
+				function()
+					local cat = categoryMap[name]
+					if cat and cat.menu == lastMenu and not cat.button:isHovered() then
+						local mousePos = g_window.getMousePosition()
+						if not cat.menu or not cat.menu:isVisible() or not cat.menu:containsPoint(mousePos) then
+							hideCategoryMenu(name)
+						end
 					end
-				end
-			end, 100)
+				end,
+			100)
 		end
 	end
 	return catButton
@@ -156,6 +281,13 @@ function init()
 	topMenu.buttonsPanel = topMenu:getChildById("buttonsPanel")
 	topMenu.fpsLabel = topMenu:getChildById("fpsLabel")
 	topMenu.pingLabel = topMenu:getChildById("pingLabel")
+	topMenu.onGeometryChange = function()
+		updateCurrentMenuPosition()
+	end
+	topMenu.onDragLeave = function()
+		savePosition()
+		return true
+	end
 
 	-- create predefined categories
 	table.sort(
@@ -165,8 +297,10 @@ function init()
 		end
 	)
 	for _, cat in ipairs(categories) do
-		createCategory(cat.name, cat.icon, cat.tooltip, cat.index)
+		createCategory(cat.name, cat.icon, cat.tooltip, cat.index, true)
 	end
+
+	updateTopMenuWidth()
 
 	Keybind.new("UI", "Toggle Top Menu", "Ctrl+Shift+T", "")
 	Keybind.bind(
@@ -200,12 +334,21 @@ function terminate()
 
 	Keybind.delete("UI", "Toggle Top Menu")
 
-	topMenu:destroy()
+	for _, cat in pairs(categoryMap) do
+		if cat.menu then
+			cat.menu:destroy()
+		end
+	end
+
+	if topMenu then
+		topMenu:destroy()
+	end
 end
 
 function online()
 	modules.game_interface.getRootPanel():addAnchor(AnchorTop, "parent", AnchorTop)
 	topMenu:show()
+	loadPosition()
 
 	if topMenu.pingLabel then
 		addEvent(
@@ -282,7 +425,7 @@ function setFpsVisible(enable)
 end
 
 function addOwnListing(id, description, icon, callback, index)
-	return createButton(id, description, icon, callback, index)
+	return createButton(id, description, icon, callback, index, false)
 end
 
 function addCategoryListing(id, description, icon, callback, category, index)

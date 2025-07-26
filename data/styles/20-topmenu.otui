@@ -1,35 +1,114 @@
-TopButton < Button
-  size: 26 26
-  icon-rect: 0 0 22 22
+TopButton < UIWidget
+  icon-rect: 0 0 38 38
   focusable: false
+  font: verdana-11px-antialised
+  image-color: white
+  icon-color: white
+  color: white
+  width: 100
+  text-offset: 0 1
+  image-source: /images/ui/panel_noselect
+  padding: 10
+  image-border: 7
+  opacity: 1.0
+  change-cursor-image: true
+  cursor: pointer
+  phantom: false
+
+  $hover:
+    image-color: white
+    icon-color: white
+    color: white
+    image-source: /images/ui/panel_select
+
+  $pressed:
+    image-color: #dfdfdf88
+    icon-color: #dfdfdf88
+    color: #dfdfdf88
 
 
+TopButton2 < UIWidget
+  icon-rect: 0 0 38 38
+  focusable: false
+  font: verdana-11px-antialised
+  image-color: white
+  icon-color: white
+  color: white
+  width: 100
+  text-offset: 0 1
+  image-source: /images/ui/panel_noselect
+  padding: 10
+  image-border: 7
+  opacity: 1.0
+  phantom: false
 
+  $hover:
+    image-color: white
+    icon-color: white
+    color: white
+    image-source: /images/ui/panel_select
+
+  $checked:
+    image-color: white
+    icon-color: white
+    color: white
+    image-source: /images/ui/panel_select
+
+TopCategoryMenu < Panel
+  border-width: 1
+  border-color: #A68D73
+  background-color: #141923
+  padding: 5
+  phantom: false
+  layout:
+    type: verticalBox
+    spacing: 2
+    fit-children: true
+
+TopCategoryMenuIconButton < UIButton
+  height: 25
+  text-offset: 25 0
+  text-align: left
+  font: verdana-11px-rounded
+  color: white
+  icon-rect: 0 0 24 24
+  background-color: alpha
+
+  $hover:
+    color: #ffffff
+    background-color: #ffffff44
+
+TopCategoryMenuLabel < UIWidget
+  height: 18
+  text-align: center
+  font: verdana-11px-rounded
+  color: white
+  background-color: alpha
+  border: 1 #A68D7380
+  margin-bottom: 5
 
 
 TopMenu < UIWindow
   id: topMenu
   anchors.top: parent.top
   anchors.horizontalCenter: parent.horizontalCenter
-  width: 600
-  height: 95
+  height: 80
   background-color: #1A1A1A80
   focusable: false
   draggable: true
-  phantom: true
+  phantom: false
 
   Panel
     id: buttonsPanel
     anchors.fill: parent
     margin: 20
-    border-width: 1
-    border-color: #A68D73
+    border: 1 #A68D73
     background-color: #1A1A1A80
     phantom: true
     focusable: false
     layout:
       type: horizontalBox
-      spacing: 4
+      spacing: 2
 
   Label
     id: fpsLabel
