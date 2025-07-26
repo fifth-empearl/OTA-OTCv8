@@ -97,35 +97,10 @@ TopMenu < TopMenuPanel
     text-auto-resize: true
 
   TopMenuButtonsPanel
-    id: rightButtonsPanel
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.left: prev.right
-
-  TopMenuButtonsPanel
-    id: rightGameButtonsPanel
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.left: prev.right
-    visible: false
-
-  Label
-    id: onlineLabel
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.horizontalCenter: parent.horizontalCenter
-    text-align: center
-    text-auto-resize: true
-
-  TopMenuButtonsPanel
-    id: leftButtonsPanel
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.right: parent.right
-
-  TopMenuButtonsPanel
-    id: leftGameButtonsPanel
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
-    anchors.right: prev.left
-    visible: false
+    id: buttonsPanel
+    anchors.fill: parent
+    margin: 20
+    border-width: 1
+    border-color: #A68D73
+    background-color: #1A1A1A80
+    phantom: true

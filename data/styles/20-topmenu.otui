@@ -29,7 +29,7 @@ TopMenu < UIWindow
   draggable: true
   phantom: false
 
-  UIWidget
+  TopMenuButtonsPanel
     id: buttonsPanel
     anchors.fill: parent
     margin: 20

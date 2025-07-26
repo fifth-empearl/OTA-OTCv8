@@ -59,8 +59,8 @@ function init()
   gameLeftActions = gameRootPanel:getChildById('gameLeftActions')
   connect(gameLeftPanel, { onVisibilityChange = onLeftPanelVisibilityChange })
 
-  logoutButton = modules.client_topmenu.addLeftButton('logoutButton', tr('Exit'),
-    '/images/topbuttons/logout', tryLogout, true)
+  logoutButton = modules.client_topmenu.addOwnListing('logoutButton', tr('Exit'),
+    '/images/topbuttons/logout', tryLogout, 1)
 
 
   gameRightPanels:addChild(g_ui.createWidget('GameSidePanel'))

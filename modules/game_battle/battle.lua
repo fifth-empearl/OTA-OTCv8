@@ -17,7 +17,7 @@ local ages = {}
 
 function init()  
   g_ui.importStyle('battlebutton')
-  battleButton = modules.client_topmenu.addRightGameToggleButton('battleButton', tr('Battle') .. ' (Ctrl+B)', '/images/topbuttons/battle', toggle, false, 2)
+  battleButton = modules.client_topmenu.addCategoryListing('battleButton', tr('Battle') .. ' (Ctrl+B)', '/images/topbuttons/battle', toggle, "HUD", 1)
   battleButton:setOn(true)
   battleWindow = g_ui.loadUI('battle', modules.game_interface.getRightPanel())
 

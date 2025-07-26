@@ -2,47 +2,95 @@
 local topMenu
 local fpsUpdateEvent = nil
 
+-- list of predefined categories
+-- each element can contain: name, icon, tooltip, index (order)
 local categories = {
-	--from left to right
-	{name = "Others", icon = "", tooltip = ""}
+        -- example predefined category
+        {name = "HUD", icon = "/images/topbuttons/options", tooltip = "HUD", index = 1}
 }
 
+-- helper table mapping category names to their data
+local categoryMap = {}
+
 -- private functions
-local function addButton(id, description, icon, callback, panel, toggle, front, index)
-	local class
-	if toggle then
-		class = "TopToggleButton"
-	else
-		class = "TopButton"
-	end
+local function createButton(id, description, icon, callback, toggle, index)
+        local class = toggle and 'TopToggleButton' or 'TopButton'
+        local button = g_ui.createWidget(class, topMenu.buttonsPanel)
+        button:setId(id)
+        button:setTooltip(description)
+        button:setIcon(resolvepath(icon, 3))
+        button.onMouseRelease = function(widget, mousePos, mouseButton)
+                if widget:containsPoint(mousePos) and mouseButton ~= MouseMidButton and mouseButton ~= MouseTouch then
+                        callback()
+                        return true
+                end
+        end
+        button.onTouchRelease = button.onMouseRelease
+        if type(index) == 'number' then
+                button.index = index
+        end
+        local children = topMenu.buttonsPanel:getChildren()
+        table.sort(children, function(a,b) return (a.index or 9999) < (b.index or 9999) end)
+        for i,child in ipairs(children) do
+                topMenu.buttonsPanel:moveChildToIndex(child, i)
+        end
+        return button
+end
 
-	if topMenu.reverseButtons then
-		front = not front
-	end
+local function showCategoryMenu(name)
+        local category = categoryMap[name]
+        if not category then
+                return
+        end
 
-	-- local button = panel:getChildById(id)
-	-- if not button then
-	button = g_ui.createWidget(class)
-	-- if front then
-	-- panel:insertChild(1, button)
-	-- else
-	-- panel:addChild(button)
-	-- end
-	-- end
-	button:setId(id)
-	button:setTooltip(description)
-	button:setIcon(resolvepath(icon, 3))
-	button.onMouseRelease = function(widget, mousePos, mouseButton)
-		if widget:containsPoint(mousePos) and mouseButton ~= MouseMidButton and mouseButton ~= MouseTouch then
-			callback()
-			return true
-		end
-	end
-	button.onTouchRelease = button.onMouseRelease
-	if not button.index and type(index) == "number" then
-		button.index = index
-	end
-	return button
+        if category.menu then
+                category.menu:destroy()
+        end
+
+        local menu = g_ui.createWidget('PopupMenu')
+        menu:setGameMenu(true)
+
+        table.sort(category.items, function(a, b)
+                return (a.index or 9999) < (b.index or 9999)
+        end)
+
+        for _, item in ipairs(category.items) do
+                menu:addOption(item.description, item.callback)
+        end
+
+        local pos = category.button:getPosition()
+        pos.y = pos.y + category.button:getHeight()
+        menu:display(pos)
+
+        menu.onDestroy = function()
+                category.menu = nil
+        end
+
+        category.menu = menu
+end
+
+local function hideCategoryMenu(name)
+        local category = categoryMap[name]
+        if category and category.menu then
+                category.menu:destroy()
+        end
+end
+
+function createCategory(name, icon, tooltip, index)
+        if categoryMap[name] then
+                return categoryMap[name].button
+        end
+
+        local catButton = createButton('cat_' .. name, tooltip or name, icon or '', function() end, false, index)
+        categoryMap[name] = {button = catButton, items = {}, index = index}
+        catButton.onHoverChange = function(widget, hovered)
+                if hovered then
+                        showCategoryMenu(name)
+                else
+                        hideCategoryMenu(name)
+                end
+        end
+        return catButton
 end
 
 -- public functions
@@ -56,8 +104,19 @@ function init()
 		}
 	)
 
-	topMenu = g_ui.createWidget("TopMenu", g_ui.getRootWidget())
-	topMenu:hide()
+        topMenu = g_ui.createWidget("TopMenu", g_ui.getRootWidget())
+        topMenu:hide()
+        topMenu.buttonsPanel = topMenu:getChildById('buttonsPanel')
+        topMenu.fpsLabel = topMenu:getChildById('fpsLabel')
+        topMenu.pingLabel = topMenu:getChildById('pingLabel')
+
+        -- create predefined categories
+        table.sort(categories, function(a, b)
+                return (a.index or 9999) < (b.index or 9999)
+        end)
+        for _, cat in ipairs(categories) do
+                createCategory(cat.name, cat.icon, cat.tooltip, cat.index)
+        end
 
 	Keybind.new("UI", "Toggle Top Menu", "Ctrl+Shift+T", "")
 	Keybind.bind(
@@ -172,40 +231,19 @@ function setFpsVisible(enable)
 	topMenu.fpsLabel:setVisible(enable)
 end
 
-function addLeftButton(id, description, icon, callback, front, index)
-	return addButton(id, description, icon, callback, topMenu.leftButtonsPanel, false, front, index)
+-- new category based functions
+function addOwnListing(id, description, icon, callback, index, toggle)
+        return createButton(id, description, icon, callback, toggle, index)
 end
 
-function addLeftToggleButton(id, description, icon, callback, front, index)
-	return addButton(id, description, icon, callback, topMenu.leftButtonsPanel, true, front, index)
-end
+function addCategoryListing(id, description, icon, callback, category, index)
+        if not categoryMap[category] then
+                createCategory(category)
+        end
 
-function addRightButton(id, description, icon, callback, front, index)
-	return addButton(id, description, icon, callback, topMenu.rightButtonsPanel, false, front, index)
-end
-
-function addRightToggleButton(id, description, icon, callback, front, index)
-	return addButton(id, description, icon, callback, topMenu.rightButtonsPanel, true, front, index)
-end
-
-function addLeftGameButton(id, description, icon, callback, front, index)
-	local button = addButton(id, description, icon, callback, topMenu.leftGameButtonsPanel, false, front, index)
-	return button
-end
-
-function addLeftGameToggleButton(id, description, icon, callback, front, index)
-	local button = addButton(id, description, icon, callback, topMenu.leftGameButtonsPanel, true, front, index)
-	return button
-end
-
-function addRightGameButton(id, description, icon, callback, front, index)
-	local button = addButton(id, description, icon, callback, topMenu.rightGameButtonsPanel, false, front, index)
-	return button
-end
-
-function addRightGameToggleButton(id, description, icon, callback, front, index)
-	local button = addButton(id, description, icon, callback, topMenu.rightGameButtonsPanel, true, front, index)
-	return button
+        local cat = categoryMap[category]
+        table.insert(cat.items, {id = id, description = description, callback = callback, index = index})
+        return cat.button
 end
 
 function getButton(id)
