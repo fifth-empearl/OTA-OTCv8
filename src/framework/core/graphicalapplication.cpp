@@ -464,10 +464,10 @@ void GraphicalApplication::scale(float value)
     if (m_scaling == value) {
         value = m_lastScaling;
     } else {
-        m_lastScaling = std::max<float>(1.0, std::min<float>(maxScale, value));
+        m_lastScaling = std::max<float>(0.5f, std::min<float>(maxScale, value));
     }
 
-    m_scaling = std::max<float>(1.0, std::min<float>(maxScale, value));
+    m_scaling = std::max<float>(0.5f, std::min<float>(maxScale, value));
     g_window.setScaling(m_scaling);
 
     g_dispatcher.addEvent([&] {
