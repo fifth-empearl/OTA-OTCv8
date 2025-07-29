@@ -207,3 +207,26 @@ OptionPanel
       anchors.top: parent.top
       anchors.left: parent.left
       width: 150
+
+  Label
+    id: uiScaleLabel
+    margin-top: 10
+    @onSetup: |
+      local index = modules.client_options.getOption('uiScale')
+      self:setText(tr('UI scale: %d%%', 60 + index * 10))
+
+  ComboBox
+    id: uiScale
+    margin-left: 2
+    margin-right: 2
+    @onOptionChange: modules.client_options.presetOption(self, self:getId(), self.currentIndex)
+    @onSetup: |
+      self:addOption('70%')
+      self:addOption('80%')
+      self:addOption('90%')
+      self:addOption('100%')
+      self:addOption('110%')
+      self:addOption('120%')
+      self:addOption('130%')
+      self:addOption('140%')
+      self:addOption('150%')

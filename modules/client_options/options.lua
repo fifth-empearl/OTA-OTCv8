@@ -30,6 +30,7 @@ local defaultOptions = {
   crosshair = 2,
   ambientLight = 100,
   optimizationLevel = 1,
+  uiScale = 4,
   displayNames = true,
   displayHealth = true,
   displayMana = true,
@@ -612,6 +613,10 @@ function updateValues(key, value)
     gameMapPanel:setDrawLights(options["enableLights"] and value < 100)
   elseif key == "optimizationLevel" then
     g_adaptiveRenderer.setLevel(value - 2)
+  elseif key == "uiScale" then
+    local percent = 60 + value * 10
+    interfacePanel:getChildById("uiScaleLabel"):setText(tr("UI scale: %d%%", percent))
+    g_app.scale(percent / 100)
   elseif key == "displayNames" then
     gameMapPanel:setDrawNames(value)
   elseif key == "displayHealth" then
