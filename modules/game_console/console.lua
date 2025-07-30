@@ -61,6 +61,7 @@ ChannelEventFormats = {
 
 MAX_HISTORY = 500
 MAX_LINES = 100
+OLD_MESSAGE_OPACITY = 0.5
 HELP_CHANNEL = 9
 
 consolePanel = nil
@@ -496,6 +497,18 @@ end
 
 function clearChannel(consoleTabBar)
   consoleTabBar:getCurrentTab().tabPanel:getChildById('consoleBuffer'):destroyChildren()
+end
+
+function fadeOldMessages()
+  for _, tab in ipairs(consoleTabBar:getTabs()) do
+    local panel = consoleTabBar:getTabPanel(tab)
+    if panel then
+      local buffer = panel:getChildById('consoleBuffer')
+      for _, label in pairs(buffer:getChildren()) do
+        label:setOpacity(OLD_MESSAGE_OPACITY)
+      end
+    end
+  end
 end
 
 function setTextEditText(text)
@@ -1829,7 +1842,25 @@ function offline()
   if g_game.getClientVersion() < 862 then
     Keybind.delete("Dialogs", "Open Rule Violation")
   end
-  clear()
+  fadeOldMessages()
+  consoleTextEdit:clearText()
+
+  if violationWindow then
+    violationWindow:destroy()
+    violationWindow = nil
+  end
+
+  if channelsWindow then
+    channelsWindow:destroy()
+    channelsWindow = nil
+  end
+
+  local gameRootPanel = modules.game_interface.getRootPanel()
+  g_keyboard.unbindKeyDown("Enter", temporaryChatOn, gameRootPanel)
+  g_keyboard.unbindKeyDown("Enter", temporaryChatOff, gameRootPanel)
+  g_keyboard.unbindKeyDown("Escape", temporaryChatOff, gameRootPanel)
+
+  channels = {}
 end
 
 function onChannelEvent(channelId, name, type)
