@@ -33,6 +33,7 @@
 #include "localplayer.h"
 #include "outfit.h"
 #include <framework/core/timer.h>
+#include <algorithm>
 
 #include <bitset>
 
@@ -390,6 +391,13 @@ public:
         return m_transferableCoins;
     }
 
+    void setEffectTicksPerFrame(int ticks)
+    {
+        m_effectTicksPerFrame = std::max(1, ticks);
+        Effect::setTicksPerFrame(m_effectTicksPerFrame);
+    }
+    int getEffectTicksPerFrame() { return m_effectTicksPerFrame; }
+
     void setMaxPreWalkingSteps(uint value) { m_maxPreWalkingSteps = value; }
     uint getMaxPreWalkingSteps() { return m_maxPreWalkingSteps; }
 
@@ -473,6 +481,7 @@ private:
     int m_clientCustomOs;
     int m_coins;
     int m_transferableCoins;
+    int m_effectTicksPerFrame = Effect::DEFAULT_EFFECT_TICKS;
 
     bool m_showRealDirection = false;
     bool m_ignoreServerDirection = true;

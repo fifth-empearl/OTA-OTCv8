@@ -346,6 +346,8 @@ void Client::registerLuaFunctions()
 
     g_lua.bindSingletonFunction("g_game", "getMaxPreWalkingSteps", &Game::getMaxPreWalkingSteps, &g_game);
     g_lua.bindSingletonFunction("g_game", "setMaxPreWalkingSteps", &Game::setMaxPreWalkingSteps, &g_game);
+    g_lua.bindSingletonFunction("g_game", "setEffectTicksPerFrame", &Game::setEffectTicksPerFrame, &g_game);
+    g_lua.bindSingletonFunction("g_game", "getEffectTicksPerFrame", &Game::getEffectTicksPerFrame, &g_game);
     g_lua.bindSingletonFunction("g_game", "ignoreServerDirection", &Game::ignoreServerDirection, &g_game);
     g_lua.bindSingletonFunction("g_game", "showRealDirection", &Game::showRealDirection, &g_game);
     g_lua.bindSingletonFunction("g_game", "enableTileThingLuaCallback", &Game::enableTileThingLuaCallback, &g_game);

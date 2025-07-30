@@ -663,7 +663,7 @@ function updateValues(key, value)
     end
   elseif key == "effectsSpeed" then
     graphicsPanel:getChildById("effectsSpeedLabel"):setText(tr("Effects speed: %s ms", value))
-    Effect.setTicksPerFrame(value)
+    g_game.setEffectTicksPerFrame(value)
   elseif key == "chatMode" then
     Keybind.setChatMode(value)
     local check = value ~= CHAT_MODE.ON and true or false
