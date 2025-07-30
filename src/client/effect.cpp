@@ -26,6 +26,19 @@
 #include <framework/core/eventdispatcher.h>
 #include <framework/util/extras.h>
 #include <framework/stdext/fastrand.h>
+#include <algorithm>
+
+int Effect::TICKS_PER_FRAME = 75;
+
+void Effect::setTicksPerFrame(int ticks)
+{
+    TICKS_PER_FRAME = std::max(1, ticks);
+}
+
+int Effect::getTicksPerFrame()
+{
+    return TICKS_PER_FRAME;
+}
 
 void Effect::draw(const Point& dest, int offsetX, int offsetY, bool animate, LightView* lightView)
 {
@@ -38,7 +51,7 @@ void Effect::draw(const Point& dest, int offsetX, int offsetY, bool animate, Lig
             m_animationPhase = std::max<int>(0, rawGetThingType()->getAnimator()->getPhaseAt(m_animationTimer, m_randomSeed, m_animationPhase));
         } else {
             // hack to fix some animation phases duration, currently there is no better solution
-            int ticks = EFFECT_TICKS_PER_FRAME;
+            int ticks = TICKS_PER_FRAME;
             if (m_id == 33) {
                 ticks <<= 2;
             }
@@ -67,7 +80,7 @@ void Effect::onAppear()
         m_randomSeed = (uint32_t)stdext::fastrand();
         duration = getThingType()->getAnimator() ? getThingType()->getAnimator()->getTotalDuration(m_randomSeed) : 1000;
     } else {
-        duration = EFFECT_TICKS_PER_FRAME;
+        duration = TICKS_PER_FRAME;
 
         // hack to fix some animation phases duration, currently there is no better solution
         if(m_id == 33) {

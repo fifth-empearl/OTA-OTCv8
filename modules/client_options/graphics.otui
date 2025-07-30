@@ -74,6 +74,19 @@ OptionPanel
     margin-top: 3
     minimum: 0
     maximum: 100
+
+  Label
+    id: effectsSpeedLabel
+    margin-top: 6
+    @onSetup: |
+      local value = modules.client_options.getOption('effectsSpeed')
+      self:setText(tr('Effects speed: %s ms', value))
+
+  OptionScrollbar
+    id: effectsSpeed
+    margin-top: 3
+    minimum: 50
+    maximum: 100
   
   Label
     id: tips

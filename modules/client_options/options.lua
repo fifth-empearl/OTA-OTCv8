@@ -70,6 +70,8 @@ local defaultOptions = {
   antialiasing = true,
   floorShadow = true,
 
+  effectsSpeed = 75,
+
   autoSwitchPreset = true
 }
 
@@ -659,6 +661,9 @@ function updateValues(key, value)
     else
       g_game.disableFeature(GameDrawFloorShadow)
     end
+  elseif key == "effectsSpeed" then
+    graphicsPanel:getChildById("effectsSpeedLabel"):setText(tr("Effects speed: %s ms", value))
+    Effect.setTicksPerFrame(value)
   elseif key == "chatMode" then
     Keybind.setChatMode(value)
     local check = value ~= CHAT_MODE.ON and true or false
