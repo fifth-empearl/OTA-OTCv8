@@ -57,6 +57,7 @@ private:
     int m_animationPhase = 0;
     uint32 m_randomSeed;
 
+    static constexpr int DEFAULT_EFFECT_TICKS = 75;
     static int TICKS_PER_FRAME;
 };
 
