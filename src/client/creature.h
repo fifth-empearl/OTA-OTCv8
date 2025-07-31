@@ -208,10 +208,13 @@ protected:
 
     void updateOutfitColor(Color color, Color finalColor, Color delta, int duration);
     void updateJump();
+    void updateHealthPercentDisplay();
 
     uint32 m_id;
     std::string m_name;
     uint8 m_healthPercent;
+    uint8 m_healthPercentDisplay;
+    ScheduledEventPtr m_healthPercentUpdateEvent;
     int8 m_manaPercent;
     Otc::Direction m_direction;
     Otc::Direction m_walkDirection;

@@ -51,6 +51,8 @@ Creature::Creature() : Thing()
 {
     m_id = 0;
     m_healthPercent = 100;
+    m_healthPercentDisplay = 100;
+    m_healthPercentUpdateEvent = nullptr;
     m_manaPercent = -1;
     m_speed = 200;
     m_direction = Otc::South;
@@ -76,6 +78,10 @@ Creature::Creature() : Thing()
 
 Creature::~Creature()
 {
+    if (m_healthPercentUpdateEvent) {
+        m_healthPercentUpdateEvent->cancel();
+        m_healthPercentUpdateEvent = nullptr;
+    }
     g_stats.removeCreature();
 }
 
@@ -194,7 +200,7 @@ void Creature::drawInformation(const Point& point, bool useGray, const Rect& par
 
     // health rect is based on background rect, so no worries
     Rect healthRect = backgroundRect.expanded(-1);
-    healthRect.setWidth((m_healthPercent / 100.0) * 25);
+    healthRect.setWidth((m_healthPercentDisplay / 100.0) * 25);
 
     // draw
     if (g_game.getFeature(Otc::GameBlueNpcNameColor) && isNpc() && m_healthPercent == 100 && !useGray)
@@ -672,6 +678,10 @@ void Creature::setHealthPercent(uint8 healthPercent)
     m_healthPercent = healthPercent;
     if (changed) {
         callLuaField("onHealthPercentChange", healthPercent);
+        if (g_game.getFeature(Otc::GameSmoothHealthBar))
+            updateHealthPercentDisplay();
+        else
+            m_healthPercentDisplay = m_healthPercent;
     }
 
     if (healthPercent <= 0)
@@ -731,6 +741,30 @@ void Creature::updateOutfitColor(Color color, Color finalColor, Color delta, int
     } else {
         m_outfitColor = finalColor;
     }
+}
+
+void Creature::updateHealthPercentDisplay()
+{
+    if (m_healthPercentUpdateEvent) {
+        m_healthPercentUpdateEvent->cancel();
+        m_healthPercentUpdateEvent = nullptr;
+    }
+
+    if (m_healthPercentDisplay == m_healthPercent)
+        return;
+
+    int diff = static_cast<int>(m_healthPercent) - static_cast<int>(m_healthPercentDisplay);
+    int step = std::max<int>(1, std::abs(diff) / 20);
+
+    if (diff > 0)
+        m_healthPercentDisplay = std::min<int>(m_healthPercentDisplay + step, m_healthPercent);
+    else
+        m_healthPercentDisplay = std::max<int>(m_healthPercentDisplay - step, m_healthPercent);
+
+    auto self = static_self_cast<Creature>();
+    m_healthPercentUpdateEvent = g_dispatcher.scheduleEvent([self] {
+        self->updateHealthPercentDisplay();
+    }, 30);
 }
 
 void Creature::setSpeed(uint16 speed)
