@@ -23,6 +23,7 @@
 #include "mapview.h"
 
 #include "creature.h"
+#include "creatureline.h"
 #include "map.h"
 #include "tile.h"
 #include "statictext.h"
@@ -275,6 +276,10 @@ void MapView::drawMapForeground(const Rect& rect)
         p.y = p.y * verticalStretchFactor;
         p += rect.topLeft();
         creatures.push_back(std::make_pair(creature, p));
+    }
+
+    for (const CreatureLinePtr& line : g_map.getCreatureLines()) {
+        line->draw(this, rect, cameraPosition, drawOffset, horizontalStretchFactor, verticalStretchFactor);
     }
 
     for (auto& c : creatures) {

@@ -26,6 +26,7 @@
 #include "tile.h"
 #include "item.h"
 #include "missile.h"
+#include "creatureline.h"
 #include "statictext.h"
 #include "mapview.h"
 #include "minimap.h"
@@ -108,6 +109,8 @@ void Map::cleanDynamicThings()
 
     for(int i=0;i<=Otc::MAX_Z;++i)
         m_floorMissiles[i].clear();
+
+    m_creatureLines.clear();
 
     cleanTexts();
 }
@@ -283,6 +286,69 @@ void Map::removeThingColor(const ThingPtr& thing)
 
         topThing->static_self_cast<Item>()->setColor(Color::alpha);
     }
+}
+
+void Map::addCreatureLine(const CreatureLinePtr& line)
+{
+    if (!line)
+        return;
+    for (const CreatureLinePtr& existing : m_creatureLines) {
+        if (existing->getFromId() == line->getFromId() && existing->getToId() == line->getToId() && existing->getTypeId() == line->getTypeId())
+            return;
+    }
+    m_creatureLines.push_back(line);
+}
+
+void Map::removeCreatureLinesFor(uint32 id)
+{
+    for (auto it = m_creatureLines.begin(); it != m_creatureLines.end(); ) {
+        if ((*it)->getFromId() == id || (*it)->getToId() == id)
+            it = m_creatureLines.erase(it);
+        else
+            ++it;
+    }
+}
+
+void Map::removeCreatureLinesBetween(uint32 fromId, uint32 toId)
+{
+    for (auto it = m_creatureLines.begin(); it != m_creatureLines.end(); ) {
+        if (((*it)->getFromId() == fromId && (*it)->getToId() == toId) ||
+            ((*it)->getFromId() == toId && (*it)->getToId() == fromId))
+            it = m_creatureLines.erase(it);
+        else
+            ++it;
+    }
+}
+
+void Map::createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId)
+{
+    auto it = m_creatureLineTypes.find(lineId);
+    if (it == m_creatureLineTypes.end())
+        return;
+
+    for (const CreatureLinePtr& existing : m_creatureLines) {
+        if (existing->getFromId() == fromId && existing->getToId() == toId && existing->getTypeId() == lineId)
+            return;
+    }
+
+    addCreatureLine(std::make_shared<CreatureLine>(fromId, toId, lineId, &it->second));
+}
+
+void Map::defineCreatureLineType(uint32 lineId, const std::string& image, int r, int g, int b, int a,
+                                bool stretched, bool antialias, const std::string& shader)
+{
+    CreatureLineType& t = m_creatureLineTypes[lineId];
+    t.image = image;
+    t.color = Color(r, g, b, a);
+    t.stretched = stretched;
+    t.antialias = antialias;
+    t.shader = shader;
+    t.texture = nullptr; // will be loaded lazily
+}
+
+void Map::clearCreatureLines()
+{
+    m_creatureLines.clear();
 }
 
 StaticTextPtr Map::getStaticText(const Position& pos)
@@ -511,6 +577,8 @@ void Map::removeCreatureById(uint32 id)
     auto it = m_knownCreatures.find(id);
     if(it != m_knownCreatures.end())
         m_knownCreatures.erase(it);
+
+    removeCreatureLinesFor(id);
 }
 
 void Map::removeUnawareThings()

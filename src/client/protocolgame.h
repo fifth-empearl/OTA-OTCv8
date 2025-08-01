@@ -290,6 +290,7 @@ private:
     void parseExtendedOpcode(const InputMessagePtr& msg);
     void parseChangeMapAwareRange(const InputMessagePtr& msg);
     void parseProgressBar(const InputMessagePtr& msg);
+    void parseCreatureLine(const InputMessagePtr& msg);
     void parseFeatures(const InputMessagePtr& msg);
     void parseCreaturesMark(const InputMessagePtr& msg);
     void parseNewCancelWalk(const InputMessagePtr& msg);

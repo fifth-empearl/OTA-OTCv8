@@ -30,8 +30,10 @@
 #include "animatedtext.h"
 #include "statictext.h"
 #include "tile.h"
+#include "creatureline.h"
 
 #include <framework/core/clock.h>
+#include <unordered_map>
 
 enum OTBM_ItemAttr
 {
@@ -259,6 +261,14 @@ public:
     int getFirstAwareFloor();
     int getLastAwareFloor();
     const std::vector<MissilePtr>& getFloorMissiles(int z) { return m_floorMissiles[z]; }
+    const std::vector<CreatureLinePtr>& getCreatureLines() { return m_creatureLines; }
+    void addCreatureLine(const CreatureLinePtr& line);
+    void removeCreatureLinesFor(uint32 id);
+    void removeCreatureLinesBetween(uint32 fromId, uint32 toId);
+    void createCreatureLine(uint32 fromId, uint32 toId, uint32 lineId);
+    void defineCreatureLineType(uint32 lineId, const std::string& image, int r, int g, int b, int a,
+                                bool stretched, bool antialias, const std::string& shader = "");
+    void clearCreatureLines();
 
     std::vector<AnimatedTextPtr> getAnimatedTexts() { return m_animatedTexts; }
     std::vector<StaticTextPtr> getStaticTexts() { return m_staticTexts; }
@@ -285,6 +295,8 @@ private:
     std::array<std::vector<MissilePtr>, Otc::MAX_Z+1> m_floorMissiles;
     std::vector<AnimatedTextPtr> m_animatedTexts;
     std::vector<StaticTextPtr> m_staticTexts;
+    std::vector<CreatureLinePtr> m_creatureLines;
+    std::unordered_map<uint32, CreatureLineType> m_creatureLineTypes;
     std::vector<MapViewPtr> m_mapViews;
     std::unordered_map<Position, std::string, PositionHasher> m_waypoints;
 

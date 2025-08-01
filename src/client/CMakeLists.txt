@@ -37,6 +37,8 @@ set(client_SOURCES ${client_SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/lightview.h
     ${CMAKE_CURRENT_LIST_DIR}/missile.cpp
     ${CMAKE_CURRENT_LIST_DIR}/missile.h
+    ${CMAKE_CURRENT_LIST_DIR}/creatureline.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/creatureline.h
     ${CMAKE_CURRENT_LIST_DIR}/outfit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/outfit.h
     ${CMAKE_CURRENT_LIST_DIR}/player.cpp

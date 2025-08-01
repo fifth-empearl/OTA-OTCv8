@@ -30,11 +30,13 @@
 #include "item.h"
 #include "effect.h"
 #include "missile.h"
+#include "creatureline.h"
 #include "tile.h"
 #include "luavaluecasts_client.h"
 #include <framework/core/eventdispatcher.h>
 #include <framework/util/extras.h>
 #include <framework/stdext/string.h>
+#include <memory>
 
 void ProtocolGame::parseMessage(const InputMessagePtr& msg)
 {
@@ -526,6 +528,9 @@ void ProtocolGame::parseMessage(const InputMessagePtr& msg)
                 break;
             case Proto::GameServerProgressBar:
                 parseProgressBar(msg);
+                break;
+            case Proto::GameServerCreatureLine:
+                parseCreatureLine(msg);
                 break;
             case Proto::GameServerFeatures:
                 parseFeatures(msg);
@@ -3126,6 +3131,15 @@ void ProtocolGame::parseProgressBar(const InputMessagePtr& msg)
         g_logger.traceError(stdext::format("could not get creature with id %d", id));
 }
 
+void ProtocolGame::parseCreatureLine(const InputMessagePtr& msg)
+{
+    uint32 fromId = msg->getU32();
+    uint32 toId = msg->getU32();
+    uint32 lineId = msg->getU16();
+
+    g_map.createCreatureLine(fromId, toId, lineId);
+}
+
 void ProtocolGame::parseFeatures(const InputMessagePtr& msg)
 {
     int features = msg->getU16();
@@ -3549,6 +3563,14 @@ CreaturePtr ProtocolGame::getCreature(const InputMessagePtr& msg, int type)
 
             if (creature == m_localPlayer && !m_localPlayer->isKnown())
                 m_localPlayer->setKnown(true);
+
+            uint8 lineCount = msg->getU8();
+            for (uint8 i = 0; i < lineCount; ++i) {
+                uint32 fromId = msg->getU32();
+                uint32 toId = msg->getU32();
+                uint32 lineId = msg->getU16();
+                g_map.createCreatureLine(fromId, toId, lineId);
+            }
         }
     } else if (type == Proto::Creature) {
         uint id = msg->getU32();

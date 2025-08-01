@@ -1,0 +1,14 @@
+function init()
+  -- define a basic white line as example
+  -- last parameter is the shader name to apply, empty string for none
+  g_map.defineCreatureLineType(1, '/images/lines/white.png', 255, 255, 255, 255, true, true, '')
+end
+
+function terminate()
+  g_map.clearCreatureLines()
+end
+
+-- example utility that removes all lines between two creatures
+function clearLineBetween(cidA, cidB)
+  g_map.removeCreatureLinesBetween(cidA, cidB)
+end
