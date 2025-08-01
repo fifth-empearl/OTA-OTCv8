@@ -47,6 +47,7 @@ ThingType::ThingType()
     m_layers = 0;
     m_elevation = 0;
     m_opacity = 1.0f;
+    m_bottomEffect = false;
 }
 
 void ThingType::serialize(const FileStreamPtr& fin)
@@ -486,6 +487,8 @@ void ThingType::unserializeOtml(const OTMLNodePtr& node)
                 m_attribs.set(ThingAttrFullGround, true);
             else
                 m_attribs.remove(ThingAttrFullGround);
+        } else if(node2->tag() == "bottom-effect") {
+            m_bottomEffect = node2->value<bool>();
         }
     }
 }

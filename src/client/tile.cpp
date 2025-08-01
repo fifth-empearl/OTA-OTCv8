@@ -161,6 +161,17 @@ void Tile::drawTop(const Point& dest, LightView* lightView)
     if (m_topDraws++ < m_topCorrection)
         return;
 
+    // bottom effects
+    int effectLimit = std::min<int>((int)m_effects.size() - 1, g_adaptiveRenderer.effetsLimit());
+    for (int i = effectLimit; i >= 0; --i) {
+        if (m_effects[i]->isHidden() || !m_effects[i]->isBottomEffect())
+            continue;
+        m_effects[i]->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(),
+                           m_position.x - g_map.getCentralPosition().x,
+                           m_position.y - g_map.getCentralPosition().y,
+                           true, lightView);
+    }
+
     // walking creatures
     for (const CreaturePtr& creature : m_walkingCreatures) {
         if (creature->isHidden())
@@ -187,9 +198,12 @@ void Tile::drawTop(const Point& dest, LightView* lightView)
     // effects
     limit = std::min<int>((int)m_effects.size() - 1, g_adaptiveRenderer.effetsLimit());
     for (int i = limit; i >= 0; --i) {
-        if (m_effects[i]->isHidden())
+        if (m_effects[i]->isHidden() || m_effects[i]->isBottomEffect())
             continue;
-        m_effects[i]->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(), m_position.x - g_map.getCentralPosition().x, m_position.y - g_map.getCentralPosition().y, true, lightView);
+        m_effects[i]->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(),
+                           m_position.x - g_map.getCentralPosition().x,
+                           m_position.y - g_map.getCentralPosition().y,
+                           true, lightView);
     }
 
     // top
