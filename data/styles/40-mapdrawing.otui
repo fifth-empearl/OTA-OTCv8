@@ -1,0 +1,10 @@
+MapDrawing < UIMapDrawing
+  layout:
+    type: grid
+    cell-size: 32 32
+    fit-children: true
+
+MapDrawingTile < UIWidget
+  size: 32 32
+  layout:
+    type: anchor
