@@ -1,4 +1,4 @@
-MapDrawing < UIWidget
+MapDrawing < UIMapDrawing
   layout:
     type: grid
     cell-size: 32 32

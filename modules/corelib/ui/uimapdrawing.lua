@@ -18,6 +18,7 @@
 --   }
 -- }
 -- local widget = UIMapDrawing.create(data, 32)
+-- widget:setParent(gameRootPanel)
 --
 -- -- capture a piece of the current map and print its definition
 -- UIMapDrawing.printMapArea({x = 100, y = 100}, {x = 110, y = 110})
@@ -45,7 +46,6 @@ function UIMapDrawing.create(mapData, tileSize)
 
   local layout = UIGridLayout.create(widget)
   layout:setCellSize({ width = widget.tileSize, height = widget.tileSize })
-  layout:setFitChildren(true)
   widget:setLayout(layout)
 
   if mapData then
