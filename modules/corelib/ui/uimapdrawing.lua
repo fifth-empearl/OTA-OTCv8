@@ -46,6 +46,7 @@ function UIMapDrawing.create(mapData, tileSize)
 
   local layout = UIGridLayout.create(widget)
   layout:setCellSize({ width = widget.tileSize, height = widget.tileSize })
+  layout:setFitChildren(true)
   widget:setLayout(layout)
 
   if mapData then
@@ -180,6 +181,8 @@ function UIMapDrawing:setMapData(mapData)
   if layout and layout.isUIGridLayout and layout:isUIGridLayout() then
     layout:setNumColumns(columns)
   end
+  -- ensure the widget area fits all tiles
+  self:setSize(columns * self.tileSize, #mapData * self.tileSize)
 
   for _, row in ipairs(mapData) do
     for x = 1, columns do
