@@ -26,6 +26,7 @@
 #include "tile.h"
 #include "item.h"
 #include "missile.h"
+#include "animateditemtext.h"
 #include "statictext.h"
 #include "mapview.h"
 #include "minimap.h"
@@ -115,6 +116,7 @@ void Map::cleanDynamicThings()
 void Map::cleanTexts()
 {
     m_animatedTexts.clear();
+    m_animatedItemTexts.clear();
     m_staticTexts.clear();
 }
 
@@ -159,6 +161,8 @@ void Map::addThing(const ThingPtr& thing, const Position& pos, int stackPos)
                 }
                 m_animatedTexts.push_back(animatedText);
             }
+        } else if(thing->isAnimatedItemText()) {
+            m_animatedItemTexts.push_back(thing->static_self_cast<AnimatedItemText>());
         } else if(thing->isStaticText()) {
             StaticTextPtr staticText = thing->static_self_cast<StaticText>();
 
@@ -185,6 +189,9 @@ void Map::addThing(const ThingPtr& thing, const Position& pos, int stackPos)
         } else if (thing->isAnimatedText()) {
             AnimatedTextPtr animatedText = thing->static_self_cast<AnimatedText>();
             g_lua.callGlobalField("g_map", "onAnimatedText", thing, animatedText->getText());
+        } else if (thing->isAnimatedItemText()) {
+            AnimatedItemTextPtr ait = thing->static_self_cast<AnimatedItemText>();
+            g_lua.callGlobalField("g_map", "onAnimatedItemText", thing, ait->getText());
         } else if (thing->isStaticText()) {
             StaticTextPtr staticText = thing->static_self_cast<StaticText>();
             g_lua.callGlobalField("g_map", "onStaticText", thing, staticText->getText());
@@ -226,6 +233,13 @@ bool Map::removeThing(const ThingPtr& thing)
         auto it = std::find(m_animatedTexts.begin(), m_animatedTexts.end(), animatedText);
         if(it != m_animatedTexts.end()) {
             m_animatedTexts.erase(it);
+            ret = true;
+        }
+    } else if(thing->isAnimatedItemText()) {
+        AnimatedItemTextPtr ait = thing->static_self_cast<AnimatedItemText>();
+        auto it = std::find(m_animatedItemTexts.begin(), m_animatedItemTexts.end(), ait);
+        if(it != m_animatedItemTexts.end()) {
+            m_animatedItemTexts.erase(it);
             ret = true;
         }
     } else if(thing->isStaticText()) {

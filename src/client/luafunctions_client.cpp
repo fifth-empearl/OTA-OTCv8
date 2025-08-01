@@ -32,6 +32,7 @@
 #include "missile.h"
 #include "statictext.h"
 #include "animatedtext.h"
+#include "animateditemtext.h"
 #include "creature.h"
 #include "player.h"
 #include "localplayer.h"
@@ -418,6 +419,7 @@ void Client::registerLuaFunctions()
     g_lua.bindClassMemberFunction<Thing>("isPlayer", &Thing::isPlayer);
     g_lua.bindClassMemberFunction<Thing>("isLocalPlayer", &Thing::isLocalPlayer);
     g_lua.bindClassMemberFunction<Thing>("isAnimatedText", &Thing::isAnimatedText);
+    g_lua.bindClassMemberFunction<Thing>("isAnimatedItemText", &Thing::isAnimatedItemText);
     g_lua.bindClassMemberFunction<Thing>("isStaticText", &Thing::isStaticText);
     g_lua.bindClassMemberFunction<Thing>("isGround", &Thing::isGround);
     g_lua.bindClassMemberFunction<Thing>("isGroundBorder", &Thing::isGroundBorder);
@@ -721,6 +723,10 @@ void Client::registerLuaFunctions()
     g_lua.bindClassMemberFunction<AnimatedText>("getText", &AnimatedText::getText);
     g_lua.bindClassMemberFunction<AnimatedText>("getOffset", &AnimatedText::getOffset);
     g_lua.bindClassMemberFunction<AnimatedText>("getColor", &AnimatedText::getColor);
+
+    g_lua.registerClass<AnimatedItemText, Thing>();
+    g_lua.bindClassMemberFunction<AnimatedItemText>("getText", &AnimatedItemText::getText);
+    g_lua.bindClassMemberFunction<AnimatedItemText>("getOffset", &AnimatedItemText::getOffset);
 
     g_lua.registerClass<Player, Creature>();
     g_lua.registerClass<Npc, Creature>();
