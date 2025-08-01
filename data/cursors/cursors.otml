@@ -14,3 +14,7 @@ Cursors
   pointer:
     image: pointer
     hot-spot: 5 0
+  # Cursor used as the default when no custom cursor is active
+  default:
+    image: pointer
+    hot-spot: 5 0

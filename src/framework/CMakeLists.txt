@@ -387,7 +387,7 @@ if(FRAMEWORK_GRAPHICS)
             message(STATUS "Windows console: OFF")
         endif()
     elseif(NOT WASM)
-        set(framework_LIBRARIES ${framework_LIBRARIES} X11)
+        set(framework_LIBRARIES ${framework_LIBRARIES} X11 Xcursor)
     endif()
 
     set(framework_SOURCES ${framework_SOURCES}

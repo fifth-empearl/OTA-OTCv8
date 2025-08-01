@@ -20,6 +20,10 @@
         "openssl",
         "openal-soft",
         "glew",
+        {
+            "name": "libxcursor",
+            "platform": "!windows"
+        },
         "luajit",
         {
             "name": "opengl",

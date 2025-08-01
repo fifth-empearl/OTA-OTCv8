@@ -44,10 +44,17 @@ void Mouse::loadCursors(std::string filename)
         OTMLDocumentPtr doc = OTMLDocument::parse(filename);
         OTMLNodePtr cursorsNode = doc->at("Cursors");
 
-        for(const OTMLNodePtr& cursorNode : cursorsNode->children())
+        for(const OTMLNodePtr& cursorNode : cursorsNode->children()) {
             addCursor(cursorNode->tag(),
                       stdext::resolve_path(cursorNode->valueAt("image"), cursorNode->source()),
                       cursorNode->valueAt<Point>("hot-spot"));
+            if(cursorNode->tag() == "default")
+                setDefaultCursor("default");
+        }
+
+        auto it = m_cursors.find(m_defaultCursor);
+        if(it != m_cursors.end())
+            g_window.setMouseCursor(it->second);
     } catch(stdext::exception& e) {
         g_logger.error(stdext::format("unable to load cursors file: %s", e.what()));
     }
@@ -113,8 +120,13 @@ void Mouse::popCursor(const std::string& name)
 
     if(m_cursorStack.size() > 0)
         g_window.setMouseCursor(m_cursorStack.back());
-    else
-        g_window.restoreMouseCursor();
+    else {
+        auto it = m_cursors.find(m_defaultCursor);
+        if(it != m_cursors.end())
+            g_window.setMouseCursor(it->second);
+        else
+            g_window.restoreMouseCursor();
+    }
 }
 
 bool Mouse::isCursorChanged()
