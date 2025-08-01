@@ -44,6 +44,7 @@
 
 #include <framework/util/stats.h>
 #include <framework/util/extras.h>
+#include <algorithm>
 
 std::array<double, Otc::LastSpeedFormula> Creature::m_speedFormula = { -1,-1,-1 };
 
@@ -71,6 +72,8 @@ Creature::Creature() : Thing()
     m_outfitColor = Color::white;
     m_progressBarPercent = 0;
     m_progressBarUpdateEvent = nullptr;
+    m_scale.start = 1.f;
+    m_scale.target = 1.f;
     g_stats.addCreature();
 }
 
@@ -102,8 +105,17 @@ void Creature::draw(const Point& dest, bool animate, LightView* lightView)
     if (m_outfit.getCategory() != ThingCategoryCreature)
         animationOffset -= getDisplacement();
 
+    float scale = getScale();
     size_t drawQueueSize = g_drawQueue->size();
-    m_outfit.draw(dest - jumpOffset + animationOffset, m_walking ? m_walkDirection : m_direction, m_walkAnimationPhase, true, lightView);
+    Point drawPos = dest - jumpOffset + animationOffset;
+    m_outfit.draw(drawPos, m_walking ? m_walkDirection : m_direction, m_walkAnimationPhase, true, lightView);
+    if (scale != 1.f) {
+        const int baseSize = g_sprites.spriteSize();
+        Point offset(static_cast<int>(static_cast<float>(baseSize) * (1.f - scale)),
+                     static_cast<int>(static_cast<float>(baseSize) * (1.f - scale)));
+        Rect scaledRect(drawPos + offset, Size(baseSize, baseSize) * scale);
+        g_drawQueue->correctOutfit(scaledRect, drawQueueSize, false, false);
+    }
     if (m_marked) {
         g_drawQueue->setMark(drawQueueSize, updatedMarkedColor());
     }
@@ -1213,4 +1225,26 @@ void Creature::setTitle(const std::string& title, const std::string& font, const
         m_titleCache.setFont(g_fonts.getFont(font));
     }
     m_titleColor = color;
+}
+
+void Creature::setScale(float scale, uint16_t duration)
+{
+    if (duration == 0) {
+        m_scale.start = scale;
+        m_scale.target = scale;
+        m_scale.duration = 0;
+    } else {
+        m_scale.start = getScale();
+        m_scale.target = scale;
+        m_scale.duration = duration;
+        m_scale.timer.restart();
+    }
+}
+
+float Creature::getScale() const
+{
+    if (m_scale.duration == 0)
+        return m_scale.target;
+    float t = std::min<float>(m_scale.timer.ticksElapsed() / static_cast<float>(m_scale.duration), 1.f);
+    return m_scale.start + (m_scale.target - m_scale.start) * t;
 }

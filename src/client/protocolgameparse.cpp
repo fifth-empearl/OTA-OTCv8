@@ -34,6 +34,7 @@
 #include "luavaluecasts_client.h"
 #include <framework/core/eventdispatcher.h>
 #include <framework/util/extras.h>
+#include <framework/stdext/cast.h>
 #include <framework/stdext/string.h>
 
 void ProtocolGame::parseMessage(const InputMessagePtr& msg)
@@ -3095,7 +3096,16 @@ void ProtocolGame::parseExtendedOpcode(const InputMessagePtr& msg)
 
     if (opcode == 0)
         m_enableSendExtendedOpcode = true;
-    else
+    else if (opcode == 1) {
+        auto values = stdext::split(buffer, ",");
+        if (values.size() >= 2) {
+            uint32 id = stdext::unsafe_cast<uint32>(values[0]);
+            float scale = stdext::unsafe_cast<float>(values[1], 1.f);
+            uint16_t duration = values.size() >= 3 ? stdext::unsafe_cast<uint16_t>(values[2], 0) : 0;
+            if (CreaturePtr creature = g_map.getCreatureById(id))
+                creature->setScale(scale, duration);
+        }
+    } else
         callLuaField("onExtendedOpcode", opcode, buffer);
 }
 
