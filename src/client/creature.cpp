@@ -104,6 +104,15 @@ void Creature::draw(const Point& dest, bool animate, LightView* lightView)
 
     size_t drawQueueSize = g_drawQueue->size();
     m_outfit.draw(dest - jumpOffset + animationOffset, m_walking ? m_walkDirection : m_direction, m_walkAnimationPhase, true, lightView);
+    float opacity = 1.f;
+    if (m_type == Proto::CreatureTypeSummonOwn) {
+        opacity = g_game.getSelfSummonOpacity();
+    } else if (m_type == Proto::CreatureTypeSummonOther) {
+        opacity = g_game.getOtherSummonOpacity();
+    }
+    if (opacity < 1.f) {
+        g_drawQueue->setOpacity(drawQueueSize, opacity);
+    }
     if (m_marked) {
         g_drawQueue->setMark(drawQueueSize, updatedMarkedColor());
     }
@@ -135,6 +144,10 @@ void Creature::drawOutfit(const Rect& destRect, Otc::Direction direction, const 
 
 void Creature::drawInformation(const Point& point, bool useGray, const Rect& parentRect, int drawFlags)
 {
+    if ((m_type == Proto::CreatureTypeSummonOwn && g_game.getSelfSummonOpacity() == 0.f) ||
+        (m_type == Proto::CreatureTypeSummonOther && g_game.getOtherSummonOpacity() == 0.f)) {
+        return;
+    }
     if (!g_game.getFeature(Otc::GameOldInformationBar) && g_game.getClientVersion() >= 760) {
         if (m_healthPercent < 1)  // creature is dead, we get rid of its information bar
             return;
