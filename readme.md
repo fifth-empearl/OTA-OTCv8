@@ -64,3 +64,5 @@ Then open `android/otclientv8.sln`, open Tools -> Options -> Cross Platform -> C
 
 - To run tests manually, unpack tests.7z and use command `otclient_debug.exe --test`
 - To test mobile UI use command `otclient_debug.exe --mobile`
+- UI widgets can now use custom shaders for their images. Call `widget:setImageShader('shader_name')` in Lua to apply a shader or define `image-shader` in your .otui files.
+- UI widgets can also apply shaders to text via `widget:setTextShader('shader_name')` or using `text-shader` in .otui definitions.
